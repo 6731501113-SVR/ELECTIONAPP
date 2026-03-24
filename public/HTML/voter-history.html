@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting History - MFU Election</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body style="display: block; background: #f8fafc;">
+
+
+    <nav class="navbar voter"
+        style="background-color: #2563eb; color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box;">
+        <h2 style="margin: 0;">MFU Voting - Voter</h2>
+        <a href="index.html" class="btn"
+            style="background: white; color: #2563eb; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
+    </nav>
+
+
+    <div class="nav-links"
+        style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 65px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
+        <a href="voter-dashboard.html"
+            style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📊
+            Dashboard</a>
+        <a href="voter-candidates.html"
+            style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">👥
+            Candidates</a>
+        <a href="voter-voting.html"
+            style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">🗳️
+            Vote Now</a>
+        <a href="voter-history.html"
+            style="text-decoration: none; color: #2563eb; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid #2563eb; font-weight: 600;">🕒
+            History</a>
+        <a href="voter-results.html"
+            style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📈
+            Results</a>
+    </div>
+
+
+    <div class="container"
+        style="margin-top: 150px; max-width: 1000px; margin-left: auto; margin-right: auto; padding: 20px;">
+        <h1 style="margin-bottom: 30px; font-size: 2.5rem; color: #1e293b;">Voting History</h1>
+
+        <div id="historyContainer">
+            <div class="card"
+                style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 25px; border-left: 6px solid #f97316;">
+                <div
+                    style="font-size: 3rem; background: #fff7ed; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                    ⚠️</div>
+                <div>
+                    <h2 style="color: #c2410c; margin: 0; font-size: 1.5rem;">Not Voted Yet</h2>
+                    <p style="color: #475569; margin-top: 5px; font-size: 1.1rem;">You haven't cast your vote. Please go
+                        to the 'Vote Now' page.</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div
+            style="background: #fffbeb; border: 1px solid #fef3c7; padding: 20px; border-radius: 12px; margin-top: 30px; color: #92400e; font-size: 0.95rem; line-height: 1.6;">
+            <strong>Note:</strong> Your voting information is confidential and cannot be changed once submitted.
+        </div>
+
+        <div id="btnContainer" style="margin-top: 30px; text-align: center;">
+            <a href="voter-voting.html" class="btn"
+                style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Go
+                to Voting Page</a>
+        </div>
+        <footer style="text-align: center; margin-top: 50px; padding: 20px; color: #94a3b8; font-size: 0.9rem;">
+            © 2026 Mae Fah Luang University - All rights reserved
+        </footer>
+    </div>
+
+
+    <script>
+        // ใช้รหัสสมมติ(ค่อยมาคิดรหัสจิงที่หลัง
+        const citizenId = "1234567890123";
+
+
+        fetch(`http://localhost:3000/history/${citizenId}`)
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.hasVoted) {
+                    const historyContainer = document.getElementById('historyContainer');
+                    const btnContainer = document.getElementById('btnContainer');
+
+                    // แปลงเวลา
+                    const voteDate = new Date(data.data.vote_timestamp).toLocaleString();
+
+
+
+                    historyContainer.innerHTML = `
+                        <div class="card" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 25px; border-left: 6px solid #16a34a;">
+                            <div style="font-size: 3rem; background: #f0fdf4; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">✅</div>
+                            <div>
+                                <h2 style="color: #15803d; margin: 0; font-size: 1.5rem;">Vote Cast Successfully</h2>
+                                <p style="color: #475569; margin-top: 5px; font-size: 1.1rem;">You successfully voted for <strong>${data.data.candidate_name}</strong> (${data.data.can_id}).</p>
+                                <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 8px; display: flex; align-items: center; gap: 5px;">🕒 Timestamp: ${voteDate}</p>
+                            </div>
+                        </div>
+                    `;
+
+
+
+                    btnContainer.innerHTML = `
+                        <a href="voter-results.html" class="btn" style="background-color: #16a34a; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">View Live Results</a>
+                    `;
+                }
+
+            })
+            .catch(error => {
+                console.error('Error fetching history:', error);
+            });
+    </script>
+</body>
+
+</html>

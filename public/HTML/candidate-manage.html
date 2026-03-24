@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Profile - Candidate</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="display: block; background: #f8fafc;">
+
+    <nav class="navbar candidate" style="background-color: #16a34a; color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box;">
+        <h2 style="margin: 0;">MFU Voting - Candidate</h2>
+        <a href="index.html" class="btn" style="background: white; color: #16a34a; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
+    </nav>
+
+    <div class="nav-links" style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 65px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
+        <a href="candidate-dashboard.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📊 Dashboard</a>
+        <a href="candidate-manage.html" style="text-decoration: none; color: #16a34a; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid #16a34a; font-weight: 600;">⚙️ Manage Info</a>
+        <a href="candidate-results.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📈 Election Results</a>
+    </div>
+
+    <div class="container" style="margin-top: 160px; max-width: 900px; margin-left: auto; margin-right: auto; padding: 20px;">
+        <h1 style="margin-bottom: 30px; font-size: 2.2rem; color: #1e293b;">Manage Information & Policies</h1>
+        
+        <div class="card" style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h3 style="margin-bottom: 25px; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">Edit Personal Information</h3>
+            
+            <div style="margin-top: 20px;">
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #475569;">Candidate ID</label>
+                    <input type="text" value="C001" disabled style="width: 100%; padding: 12px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; color: #94a3b8; font-weight: bold;">
+                    <small style="color: #94a3b8; display: block; mt: 5px;">Candidate ID cannot be modified.</small>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #475569;">Full Name</label>
+                    <input type="text" value="Dr. Anon Meekwamroo" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #475569;">Policies & Vision</label>
+                    <textarea rows="6" style="width: 100%; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; line-height: 1.6; font-family: inherit;">1. Improve university facilities and infrastructure.
+2. Support student activities and organizations.</textarea>
+                    <small style="color: #64748b; display: block; mt: 5px;">Recommend: Use bullet points for better readability.</small>
+                </div>
+
+                <div style="text-align: right; margin-top: 30px;">
+                    <button type="button" class="btn" style="background-color: #16a34a; color: white; padding: 12px 40px; font-size: 1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='#16a34a'">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <footer style="text-align: center; margin-top: 60px; padding: 30px; color: #94a3b8; font-size: 0.9rem;">
+        © 2026 Mae Fah Luang University - All rights reserved
+    </footer> -->
+
+</body>
+</html>

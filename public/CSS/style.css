@@ -1,0 +1,39 @@
+/* style.css - Main Stylesheet for MFU Election App */
+:root {
+  --blue-primary: #1e3a8a;
+  --blue-voter: #2563eb;
+  --green-candidate: #16a34a;
+  --purple-admin: #9333ea;
+  --bg-light: #f8fafc;
+  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body { background-color: var(--bg-light); color: #1e293b; min-height: 100vh; }
+
+/* Navigation Bar */
+.navbar { padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; color: white; }
+.navbar.voter { background-color: var(--blue-voter); }
+.navbar.candidate { background-color: var(--green-candidate); }
+.navbar.admin { background-color: var(--purple-admin); }
+
+/* Layout Components */
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: var(--card-shadow); border: 1px solid #e2e8f0; }
+.btn { padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-block; text-align: center; }
+
+/* Grid & Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.stat-card { display: flex; justify-content: space-between; align-items: center; }
+.stat-value { font-size: 2rem; font-weight: 700; margin: 0.5rem 0; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th { background: #f1f5f9; padding: 1rem; text-align: left; font-size: 0.85rem; color: #64748b; }
+td { padding: 1rem; border-bottom: 1px solid #f1f5f9; }
+
+/* Forms */
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.form-group input, .form-group textarea { width: 100%; padding: 0.75rem; border: 1.5px solid #e2e8f0; border-radius: 10px; background: #fcfcfd; }

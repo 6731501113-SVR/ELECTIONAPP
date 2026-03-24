@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Results - MFU Election</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* เพิ่มสไตล์ช่อง Search ให้เหมือนหน้าอื่น */
+        .search-box {
+            position: relative;
+            max-width: 450px;
+            margin-bottom: 30px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px; /* ความโค้งมนเท่ากับหน้าอื่น */
+            font-size: 0.95rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02); /* เพิ่มเงาให้นุ่มนวล */
+            transition: 0.3s;
+        }
+        .search-box input:focus {
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        .search-box span {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body style="display: block; background: #f8fafc;">
+
+    <nav class="navbar voter" style="background-color: #2563eb; color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box;">
+        <h2 style="margin: 0;">MFU Voting - Results</h2>
+        <a href="index.html" class="btn" style="background: white; color: #2563eb; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
+    </nav>
+
+    <div class="nav-links" style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 65px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
+        <a href="voter-dashboard.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📊 Dashboard</a>
+        <a href="voter-candidates.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">👥 Candidates</a>
+        <a href="voter-voting.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">🗳️ Vote Now</a>
+        <a href="voter-history.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">🕒 History</a>
+        <a href="voter-results.html" style="text-decoration: none; color: #2563eb; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid #2563eb; font-weight: 600;">📈 Results</a>
+    </div>
+
+    <div class="container" style="margin-top: 170px; max-width: 1000px; margin-left: auto; margin-right: auto; padding: 20px;">
+        <h1 style="margin-bottom: 30px; font-size: 2.5rem; color: #1e293b;">Live Election Results</h1>
+
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" placeholder="Search by Name, ID...">
+        </div>
+        
+        <div class="results-list" style="display: grid; gap: 20px;">
+            
+            <div class="card" style="background: white; padding: 25px; border-radius: 16px; border: 2px solid #fbbf24; display: flex; align-items: flex-start; gap: 20px; position: relative;">
+                <div style="width: 65px; height: 65px; background: linear-gradient(135deg, #60a5fa, #2563eb); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.8rem; flex-shrink: 0;">👤</div>
+                <div style="position: absolute; top: -10px; left: 50px; background: #fbbf24; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 3px solid white;">🏆</div>
+                <div style="flex-grow: 1;">
+                    <h3 style="margin: 0;">#1 Dr. Anon Meekwamroo (C001)</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 15px;">Improving university facilities and infrastructure.</p>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Votes Received</span><span style="font-weight: bold;">120 (40.00%)</span></div>
+                    <div style="background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden;"><div style="background: #2563eb; width: 40%; height: 100%;"></div></div>
+                </div>
+            </div>
+
+            <div class="card" style="background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; align-items: flex-start; gap: 20px;">
+                <div style="width: 65px; height: 65px; background: #94a3b8; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.8rem; flex-shrink: 0;">👤</div>
+                <div style="flex-grow: 1;">
+                    <h3 style="margin: 0;">#2 Asst. Prof. Suda Pattana (C002)</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 15px;">Expanding campus green spaces.</p>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Votes Received</span><span style="font-weight: bold;">95 (31.67%)</span></div>
+                    <div style="background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden;"><div style="background: #2563eb; width: 31.67%; height: 100%;"></div></div>
+                </div>
+            </div>
+
+            <div class="card" style="background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; align-items: flex-start; gap: 20px;">
+                <div style="width: 65px; height: 65px; background: #cbd5e1; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.8rem; flex-shrink: 0;">👤</div>
+                <div style="flex-grow: 1;">
+                    <h3 style="margin: 0;">#3 Mr. Prasit Kaona (C003)</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 15px;">Library renovation and internships.</p>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Votes Received</span><span style="font-weight: bold;">85 (28.33%)</span></div>
+                    <div style="background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden;"><div style="background: #2563eb; width: 28.33%; height: 100%;"></div></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 40px;">
+            <div class="card" style="background: #eff6ff; padding: 25px; border-radius: 12px; text-align: center;">
+                <p style="color: #1e40af; font-size: 0.9rem; margin: 0;">Total Votes Cast</p>
+                <p style="font-size: 2.5rem; font-weight: bold; color: #1e3a8a; margin: 5px 0;">300</p>
+            </div>
+            <div class="card" style="background: #eff6ff; padding: 25px; border-radius: 12px; text-align: center;">
+                <p style="color: #1e40af; font-size: 0.9rem; margin: 0;">Candidates</p>
+                <p style="font-size: 2.5rem; font-weight: bold; color: #1e3a8a; margin: 5px 0;">3</p>
+            </div>
+            <div class="card" style="background: #eff6ff; padding: 25px; border-radius: 12px; text-align: center;">
+                <p style="color: #1e40af; font-size: 0.9rem; margin: 0;">Current Leader</p>
+                <p style="font-size: 1.4rem; font-weight: bold; color: #1e3a8a; margin: 5px 0;">Dr. Anon Meekwamroo</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- <footer style="text-align: center; margin-top: 60px; padding: 30px; color: #94a3b8; font-size: 0.9rem;">
+        © 2026 Mae Fah Luang University - All rights reserved
+    </footer> -->
+
+</body>
+</html>

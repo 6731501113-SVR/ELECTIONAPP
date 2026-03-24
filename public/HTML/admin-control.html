@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Control - Admin Portal</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; }
+        .nav-link { text-decoration: none; color: #64748b; padding-bottom: 5px; border-bottom: 2px solid transparent; transition: 0.3s; display: flex; align-items: center; gap: 5px; }
+        .nav-link.active { color: #9333ea; font-weight: bold; border-bottom: 2px solid #9333ea; }
+    </style>
+</head>
+<body style="display: block;">
+
+    <nav class="navbar admin" style="background-color: #9333ea; color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; height: 70px; z-index: 1000; box-sizing: border-box;">
+        <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; white-space: nowrap;">MFU Voting - Admin</h2>
+        <a href="index.html" class="btn" style="background: white; color: #9333ea; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; flex-shrink: 0;">Logout</a>
+    </nav>
+
+    <div class="nav-links" style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 70px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
+        <a href="admin-dashboard.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📊 Dashboard</a>
+        <a href="admin-voters.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">👥 Voters</a>
+        <a href="admin-candidates.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">👤 Candidates</a>
+        <a href="admin-control.html" style="text-decoration: none; color: #9333ea; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid #9333ea; font-weight: 600;">⚙️ Control</a>
+        <a href="admin-results.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📈 Results</a>
+    </div>
+
+    <div class="container" style="margin-top: 170px; max-width: 900px; margin-left: auto; margin-right: auto; padding: 20px;">
+        <h1 style="margin-bottom: 30px; color: #1e293b;">System Control</h1>
+
+        <div class="card" style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; color: #1e293b;">Voting System Status</h3>
+                <p style="color: #16a34a; font-weight: bold; margin: 5px 0 0;">Currently Open</p>
+            </div>
+            <button style="background: #ef4444; color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer;">Close System</button>
+        </div>
+
+        <div class="card" style="background: #fff1f2; padding: 30px; border-radius: 16px; border: 1px solid #fecaca;">
+            <h3 style="color: #991b1b; margin-top: 0;">Advanced Settings</h3>
+            <p style="color: #64748b; font-size: 0.9rem;">Reset all voting data? This action cannot be undone.</p>
+            <button style="background: #dc2626; color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">Reset All Votes</button>
+        </div>
+    </div>
+
+    <!-- <footer style="text-align: center; margin-top: 60px; padding: 30px; color: #94a3b8; font-size: 0.9rem;">
+        © 2026 Mae Fah Luang University - All rights reserved
+    </footer> -->
+
+</body>
+</html>
