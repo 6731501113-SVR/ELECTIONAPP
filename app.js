@@ -8,7 +8,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // check database connection
 db.connect(err => {
     if (err) console.log("❌ DB Connect Fail:", err.message);
-    else alert("✅ Database Connected (JSON Mode)");
+    else console.log("✅ Database Connected (JSON Mode)");
 });
 
 // ======================================== LOGIN & REGISTER ========================================
@@ -19,7 +19,7 @@ app.post('/Voter/Login', (req, res) => {
     const sql = "SELECT * FROM voters WHERE citizen_id = ? AND laser_id = ?";
     db.query(sql, [citizen_id, laser_id], (err, results) => {
         if (err) return res.status(500).json({ status: 'error', msg: 'DB Error' });
-       
+
         if (results.length > 0) {
             // ส่งเป็น JSON แทนการส่งแค่ Text ชื่อไฟล์
             res.status(200).json({
@@ -79,78 +79,78 @@ app.post('/Admin/Login', (req, res) => {
 
 // API: /dashboard (ดึงสถิติรวมสำหรับ Dashboard)
 app.get('/dashboard', async (req, res) => {
-  try {
-    const [
-      [resVoters], 
-      [resCandidates], 
-      [resVoted]
-    ] = await Promise.all([
-      db.query("SELECT COUNT(*) AS total FROM voters"),
-      db.query("SELECT COUNT(*) AS total FROM candidates"),
-      db.query("SELECT COUNT(*) AS total FROM voters WHERE has_voted = 1")
-    ]);
+    try {
+        const [
+            [resVoters],
+            [resCandidates],
+            [resVoted]
+        ] = await Promise.all([
+            db.query("SELECT COUNT(*) AS total FROM voters"),
+            db.query("SELECT COUNT(*) AS total FROM candidates"),
+            db.query("SELECT COUNT(*) AS total FROM voters WHERE has_voted = 1")
+        ]);
 
-    const totalVoters = resVoters[0].total;
-    const totalCandidates = resCandidates[0].total;
-    const votedCount = resVoted[0].total;
+        const totalVoters = resVoters[0].total;
+        const totalCandidates = resCandidates[0].total;
+        const votedCount = resVoted[0].total;
 
-    // คำนวณเปอร์เซ็นต์ 
-    const participationPercent = totalVoters > 0 
-      ? parseFloat(((votedCount / totalVoters) * 100).toFixed(2)) 
-      : 0;
+        // คำนวณเปอร์เซ็นต์ 
+        const participationPercent = totalVoters > 0
+            ? parseFloat(((votedCount / totalVoters) * 100).toFixed(2))
+            : 0;
 
-    res.json({
-      // Query 1: นับจำนวน Voter ทั้งหมด
-      total_voters: totalVoters,
-      // Query 2: นับจำนวน Candidate ทั้งหมด
-      total_candidates: totalCandidates,
-      // Query 3: นับจำนวนคนที่โหวตไปแล้ว
-      voted_count: votedCount,
-      voted_percent: participationPercent 
-    });
-  } catch (err) {
-    console.error('Dashboard Error:', err);
-    res.status(500).json({ error: 'Server error', message: err.message });
-  }
+        res.json({
+            // Query 1: นับจำนวน Voter ทั้งหมด
+            total_voters: totalVoters,
+            // Query 2: นับจำนวน Candidate ทั้งหมด
+            total_candidates: totalCandidates,
+            // Query 3: นับจำนวนคนที่โหวตไปแล้ว
+            voted_count: votedCount,
+            voted_percent: participationPercent
+        });
+    } catch (err) {
+        console.error('Dashboard Error:', err);
+        res.status(500).json({ error: 'Server error', message: err.message });
+    }
 
 });
 
 // API: /results (ดึงผลคะแนนและการจัดอันดับ)
 app.get('/results', async (req, res) => {
-  try {
-    const searchQuery = req.query.search || '';
+    try {
+        const searchQuery = req.query.search || '';
 
-    // 1. หาผลรวมคะแนนทั้งหมดก่อน
-    const [totalRes] = await db.query("SELECT SUM(vote_score) AS total_votes FROM candidates");
-    const totalVotesCast = totalRes[0].total_votes || 0;
-  
-    // 2. ดึงรายชื่อ Candidate พร้อมจัดอันดับ
-    const qRanking = `
+        // 1. หาผลรวมคะแนนทั้งหมดก่อน
+        const [totalRes] = await db.query("SELECT SUM(vote_score) AS total_votes FROM candidates");
+        const totalVotesCast = totalRes[0].total_votes || 0;
+
+        // 2. ดึงรายชื่อ Candidate พร้อมจัดอันดับ
+        const qRanking = `
       SELECT can_id, name, vote_score AS votes_received, policy
       FROM candidates 
       WHERE name LIKE ? OR can_id LIKE ?
       ORDER BY vote_score DESC`;
 
-    const [results] = await db.query(qRanking, [`%${searchQuery}%`, `%${searchQuery}%`]);
-    
-      // 3. Map ข้อมูลเพื่อคำนวณ % รายบุคคล
-    const ranking = results.map(can => ({
-      ...can,
-      candidate_score_percent: totalVotesCast > 0 
-        ? ((can.votes_received / totalVotesCast) * 100).toFixed(2) 
-        : "0.00"
-    }));
+        const [results] = await db.query(qRanking, [`%${searchQuery}%`, `%${searchQuery}%`]);
 
-    res.json({
-      total_votes_cast: totalVotesCast,
-      ranking: ranking
-    });
-      
-  } catch (error) {
-    console.error('Results Error:', err);
-    res.status(500).json({ error: 'Server error', message: err.message });
-  }
-   
+        // 3. Map ข้อมูลเพื่อคำนวณ % รายบุคคล
+        const ranking = results.map(can => ({
+            ...can,
+            candidate_score_percent: totalVotesCast > 0
+                ? ((can.votes_received / totalVotesCast) * 100).toFixed(2)
+                : "0.00"
+        }));
+
+        res.json({
+            total_votes_cast: totalVotesCast,
+            ranking: ranking
+        });
+
+    } catch (error) {
+        console.error('Results Error:', err);
+        res.status(500).json({ error: 'Server error', message: err.message });
+    }
+
 });
 
 // ======================================== VOTER ========================================
@@ -197,6 +197,8 @@ app.post('/vote', (req, res) => {
     });
 });
 
+// ======================================== CANDIDATE ========================================
+
 // 3. ดูประวัติการโหวต
 app.get('/history/:citizen_id', (req, res) => {
     const citizenId = req.params.citizen_id;
@@ -216,20 +218,41 @@ app.get('/history/:citizen_id', (req, res) => {
     });
 });
 
+function authMiddleware(req, res, next) {
+    const authHeader = req.headers['authorization']; if (!authHeader) { return res.status(401).json({ error: 'Unauthorized', message: 'No token provided' }); } const token = authHeader.split(' ')[1]; // "Bearer <token>"   
+    if (!token) { return res.status(401).json({ error: 'Unauthorized', message: 'Invalid token format' }); } try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET); req.candidate = decoded; // { can_id: "C001", ... } 
+        next();
+    } catch (err) { return res.status(401).json({ error: 'Unauthorized', message: 'Invalid or expired token' }); }
+}
 
+app.get('/me', authMiddleware, (req, res) => {
+    const can_id = req.candidate.can_id;
+    const sql = `     SELECT can_id, name, personal_info, policy, vote_score, is_active     FROM candidates     WHERE can_id = ?   `;
+    db.query(sql, [can_id], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: 'Server error', message: err.message });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
+        }
+        const candidate = results[0];
+        return res.status(200).json({ can_id: candidate.can_id, name: candidate.name, personal_info: candidate.personal_info, policy: candidate.policy, vote_score: candidate.vote_score, is_active: candidate.is_active });
+    });
+});
 
+// บันทึกการแก้ไข name, personal_info, policy (ปุ ่ม Save Changes) 
+app.put('/me', authMiddleware, (req, res) => {
+    const can_id = req.candidate.can_id; const { name, personal_info, policy } = req.body;    // Validation: ต้องส่งมาอย่างน้อย 1 field   
+    if (!name && !personal_info && !policy) { return res.status(400).json({ error: 'Validation Error', message: 'Please provide at least one field to update' }); } if (name !== undefined && name.trim() === '') { return res.status(400).json({ error: 'Validation Error', message: 'name must not be empty' }); }    // Build query เฉพาะ field ที่ส่งมา   
+    const fields = []; const values = []; if (name !== undefined) { fields.push('name = ?'); values.push(name.trim()); } if (personal_info !== undefined) { fields.push('personal_info = ?'); values.push(personal_info); } if (policy !== undefined) { fields.push('policy = ?'); values.push(policy); } values.push(can_id); // สําหรับ WHERE    
+    const sql = `UPDATE candidates SET ${fields.join(', ')} WHERE can_id = ?`; db.query(sql, values, (err) => {
+        if (err) { return res.status(500).json({ error: 'Server error', message: err.message }); }      // ดึงข้อมูลที่อัปเดตแล้วกลับมาส่ง response     
+        db.query('SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?', [can_id], (err2, rows) => { if (err2) { return res.status(500).json({ error: 'Server error', message: err2.message }); } return res.status(200).json({ success: true, message: 'Profile updated successfully', data: rows[0] }); });
+    });
+});
 
-
-
-
-
-
-
-
-
-
-
-
+module.exports = app; 
 
 //root
 app.get("/", function (_req, res) {
