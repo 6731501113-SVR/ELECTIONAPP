@@ -218,17 +218,13 @@ app.get('/history/:citizen_id', (req, res) => {
     });
 });
 
-function authMiddleware(req, res, next) {
-    const authHeader = req.headers['authorization']; if (!authHeader) { return res.status(401).json({ error: 'Unauthorized', message: 'No token provided' }); } const token = authHeader.split(' ')[1]; // "Bearer <token>"   
-    if (!token) { return res.status(401).json({ error: 'Unauthorized', message: 'Invalid token format' }); } try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET); req.candidate = decoded; // { can_id: "C001", ... } 
-        next();
-    } catch (err) { return res.status(401).json({ error: 'Unauthorized', message: 'Invalid or expired token' }); }
-}
+app.get('/me', (req, res) => {
+    const can_id = req.query.can_id || req.body?.can_id;
+    if (!can_id) {
+        return res.status(400).json({ error: 'Bad Request', message: 'can_id is required (query or body)' });
+    }
 
-app.get('/me', authMiddleware, (req, res) => {
-    const can_id = req.candidate.can_id;
-    const sql = `     SELECT can_id, name, personal_info, policy, vote_score, is_active     FROM candidates     WHERE can_id = ?   `;
+    const sql = `SELECT can_id, name, personal_info, policy, vote_score, is_active FROM candidates WHERE can_id = ?`;
     db.query(sql, [can_id], (err, results) => {
         if (err) {
             return res.status(500).json({ error: 'Server error', message: err.message });
@@ -237,22 +233,65 @@ app.get('/me', authMiddleware, (req, res) => {
             return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
         }
         const candidate = results[0];
-        return res.status(200).json({ can_id: candidate.can_id, name: candidate.name, personal_info: candidate.personal_info, policy: candidate.policy, vote_score: candidate.vote_score, is_active: candidate.is_active });
+        return res.status(200).json({
+            can_id: candidate.can_id,
+            name: candidate.name,
+            personal_info: candidate.personal_info,
+            policy: candidate.policy,
+            vote_score: candidate.vote_score,
+            is_active: candidate.is_active
+        });
     });
 });
 
-// บันทึกการแก้ไข name, personal_info, policy (ปุ ่ม Save Changes) 
-app.put('/me', authMiddleware, (req, res) => {
-    const can_id = req.candidate.can_id; const { name, personal_info, policy } = req.body;    // Validation: ต้องส่งมาอย่างน้อย 1 field   
-    if (!name && !personal_info && !policy) { return res.status(400).json({ error: 'Validation Error', message: 'Please provide at least one field to update' }); } if (name !== undefined && name.trim() === '') { return res.status(400).json({ error: 'Validation Error', message: 'name must not be empty' }); }    // Build query เฉพาะ field ที่ส่งมา   
-    const fields = []; const values = []; if (name !== undefined) { fields.push('name = ?'); values.push(name.trim()); } if (personal_info !== undefined) { fields.push('personal_info = ?'); values.push(personal_info); } if (policy !== undefined) { fields.push('policy = ?'); values.push(policy); } values.push(can_id); // สําหรับ WHERE    
-    const sql = `UPDATE candidates SET ${fields.join(', ')} WHERE can_id = ?`; db.query(sql, values, (err) => {
-        if (err) { return res.status(500).json({ error: 'Server error', message: err.message }); }      // ดึงข้อมูลที่อัปเดตแล้วกลับมาส่ง response     
-        db.query('SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?', [can_id], (err2, rows) => { if (err2) { return res.status(500).json({ error: 'Server error', message: err2.message }); } return res.status(200).json({ success: true, message: 'Profile updated successfully', data: rows[0] }); });
+// บันทึกการแก้ไข name, personal_info, policy (ปุ่ม Save Changes)
+app.put('/me', (req, res) => {
+    const can_id = req.query.can_id || req.body?.can_id;
+    const { name, personal_info, policy } = req.body || {};
+
+    if (!can_id) {
+        return res.status(400).json({ error: 'Bad Request', message: 'can_id is required (query or body)' });
+    }
+    if (!name && !personal_info && !policy) {
+        return res.status(400).json({ error: 'Validation Error', message: 'Please provide at least one field to update' });
+    }
+    if (name !== undefined && name.trim() === '') {
+        return res.status(400).json({ error: 'Validation Error', message: 'name must not be empty' });
+    }
+
+    const fields = [];
+    const values = [];
+
+    if (name !== undefined) {
+        fields.push('name = ?');
+        values.push(name.trim());
+    }
+    if (personal_info !== undefined) {
+        fields.push('personal_info = ?');
+        values.push(personal_info);
+    }
+    if (policy !== undefined) {
+        fields.push('policy = ?');
+        values.push(policy);
+    }
+
+    values.push(can_id);
+    const sql = `UPDATE candidates SET ${fields.join(', ')} WHERE can_id = ?`;
+
+    db.query(sql, values, (err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Server error', message: err.message });
+        }
+
+        db.query('SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?', [can_id], (err2, rows) => {
+            if (err2) {
+                return res.status(500).json({ error: 'Server error', message: err2.message });
+            }
+            return res.status(200).json({ success: true, message: 'Profile updated successfully', data: rows[0] });
+        });
     });
 });
 
-module.exports = app; 
 
 //root
 app.get("/", function (_req, res) {
