@@ -6,6 +6,86 @@ const db = require("./db.js")
 // Serve static files from the public directory at root
 app.use(express.static(path.join(__dirname, "public")));
 
+// ======================================== DASHBOARD & RESULT ========================================
+
+// API: /dashboard (ดึงสถิติรวมสำหรับ Dashboard)
+app.get('/dashboard', async (req, res) => {
+  try {
+    const [
+      [resVoters], 
+      [resCandidates], 
+      [resVoted]
+    ] = await Promise.all([
+      db.query("SELECT COUNT(*) AS total FROM voters"),
+      db.query("SELECT COUNT(*) AS total FROM candidates"),
+      db.query("SELECT COUNT(*) AS total FROM voters WHERE has_voted = 1")
+    ]);
+
+    const totalVoters = resVoters[0].total;
+    const totalCandidates = resCandidates[0].total;
+    const votedCount = resVoted[0].total;
+
+    // คำนวณเปอร์เซ็นต์ 
+    const participationPercent = totalVoters > 0 
+      ? parseFloat(((votedCount / totalVoters) * 100).toFixed(2)) 
+      : 0;
+
+    res.json({
+      // Query 1: นับจำนวน Voter ทั้งหมด
+      total_voters: totalVoters,
+      // Query 2: นับจำนวน Candidate ทั้งหมด
+      total_candidates: totalCandidates,
+      // Query 3: นับจำนวนคนที่โหวตไปแล้ว
+      voted_count: votedCount,
+      voted_percent: participationPercent 
+    });
+  } catch (err) {
+    console.error('Dashboard Error:', err);
+    res.status(500).json({ error: 'Server error', message: err.message });
+  }
+
+});
+
+// API: /results (ดึงผลคะแนนและการจัดอันดับ)
+app.get('/results', async (req, res) => {
+  try {
+    const searchQuery = req.query.search || '';
+
+    // 1. หาผลรวมคะแนนทั้งหมดก่อน
+    const [totalRes] = await db.query("SELECT SUM(vote_score) AS total_votes FROM candidates");
+    const totalVotesCast = totalRes[0].total_votes || 0;
+  
+    // 2. ดึงรายชื่อ Candidate พร้อมจัดอันดับ
+    const qRanking = `
+      SELECT can_id, name, vote_score AS votes_received, policy
+      FROM candidates 
+      WHERE name LIKE ? OR can_id LIKE ?
+      ORDER BY vote_score DESC`;
+
+    const [results] = await db.query(qRanking, [`%${searchQuery}%`, `%${searchQuery}%`]);
+    
+      // 3. Map ข้อมูลเพื่อคำนวณ % รายบุคคล
+    const ranking = results.map(can => ({
+      ...can,
+      candidate_score_percent: totalVotesCast > 0 
+        ? ((can.votes_received / totalVotesCast) * 100).toFixed(2) 
+        : "0.00"
+    }));
+
+    res.json({
+      total_votes_cast: totalVotesCast,
+      ranking: ranking
+    });
+      
+  } catch (error) {
+    console.error('Results Error:', err);
+    res.status(500).json({ error: 'Server error', message: err.message });
+  }
+   
+});
+
+// ======================================== VOTER ========================================
+
 // 1. ดึงรายชื่อผู้สมัคร
 app.get('/candidates', (req, res) => {
     const sql = "SELECT can_id, name, policy FROM candidates";
@@ -66,6 +146,8 @@ app.get('/history/:citizen_id', (req, res) => {
         }
     });
 });
+
+
 
 
 

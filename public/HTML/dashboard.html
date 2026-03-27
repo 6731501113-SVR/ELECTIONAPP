@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - MFU Election</title>
+    <link rel="stylesheet" href="../CSS/style-result-dashboard.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+      body { font-family: "Inter", sans-serif; background: #f8fafc; margin: 0; }
+
+      /* Navbar และ Menu เลื่อนติดไปด้วยกัน */
+      .fixed-header-container {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-links-container {
+        background: white;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        padding: 15px;
+        box-sizing: border-box;
+      }
+
+      .nav-item {
+        text-decoration: none;
+        color: #64748b;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-bottom: 5px;
+        border-bottom: 3px solid transparent;
+        transition: 0.3s;
+      }
+
+      /* สี Active ตาม Role */
+      .role-voter .nav-item.active { color: var(--blue-voter) !important; border-bottom-color: var(--blue-voter) !important; }
+      .role-candidate .nav-item.active { color: var(--green-candidate) !important; border-bottom-color: var(--green-candidate) !important; }
+      .role-admin .nav-item.active { color: var(--purple-admin) !important; border-bottom-color: var(--purple-admin) !important; }
+
+      .logout-btn { background: white; padding: 8px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: 0.3s; }
+
+      /* emoji size */
+      .stat-icon {
+        font-size: 2.2rem !important;
+        display: block;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        margin-top: 180px; 
+      }
+
+      .quick-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: 0.3s;
+        border: 1px solid #f1f5f9;
+      }
+    </style>
+  </head>
+  <body id="main-body">
+
+    <div class="fixed-header-container">
+      <nav class="navbar" id="top-nav">
+        <h2 id="nav-title">MFU Voting</h2>
+        <a href="index.html" class="logout-btn" onclick="logout()">Logout</a>
+      </nav>
+      <div class="nav-links-container" id="sub-menu-bar"></div>
+    </div>
+
+    <div class="container">
+      <h1 id="dashboard-heading">Dashboard Overview</h1>
+
+      <div class="stats-grid" id="stats-container">
+        <div class="card stat-card">
+          <div>
+            <p class="stat-label" id="stat-1-label">Eligible Voters</p>
+            <p class="stat-value" id="stat-1-val">0</p>
+            <p class="stat-unit" id="stat-1-unit">People</p>
+          </div>
+          <span class="stat-icon" id="stat-1-icon">👥</span>
+        </div>
+
+        <div class="card stat-card">
+          <div>
+            <p class="stat-label" id="stat-2-label">Candidates</p>
+            <p class="stat-value" id="stat-2-val">0</p>
+            <p class="stat-unit" id="stat-2-unit">People</p>
+          </div>
+          <span class="stat-icon" id="stat-2-icon">👤</span>
+        </div>
+
+        <div class="card stat-card">
+          <div>
+            <p class="stat-label" id="stat-3-label">Total Votes Cast</p>
+            <p class="stat-value" id="stat-3-val">0</p>
+            <p class="stat-unit" id="stat-3-unit">Votes</p>
+          </div>
+          <span class="stat-icon" id="stat-3-icon">🗳️</span>
+        </div>
+
+        <div class="card stat-card">
+          <div>
+            <p class="stat-label" id="stat-4-label">Turnout Percentage</p>
+            <p class="stat-value" id="stat-4-val">0%</p>
+            <p class="stat-unit" id="stat-4-unit">of all voters</p>
+          </div>
+          <span class="stat-icon" id="stat-4-icon">📈</span>
+        </div>
+      </div>
+
+      <div class="card" id="quick-access-section">
+        <h3 id="quick-access-title">Quick Access</h3>
+        <div id="quick-access-list" style="display: grid; gap: 15px; margin-top: 20px"></div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const role = localStorage.getItem("role") || "voter";
+        const body = document.getElementById("main-body");
+        const subMenu = document.getElementById("sub-menu-bar");
+        const navTitle = document.getElementById("nav-title");
+        const quickList = document.getElementById("quick-access-list");
+
+        // 1. ตั้งค่าพื้นฐานตาม Role
+        body.className = `role-${role}`;
+
+        if (role === "admin") {
+          navTitle.innerText = "MFU Voting - Admin";
+          subMenu.innerHTML = `
+            <a href="dashboard.html" class="nav-item active">📊 Dashboard</a>
+            <a href="admin-voters.html" class="nav-item">👥 Voters</a>
+            <a href="admin-candidates.html" class="nav-item">👤 Candidates</a>
+            <a href="admin-control.html" class="nav-item">⚙️ Control</a>
+            <a href="results.html" class="nav-item">📈 Results</a>`;
+          quickList.innerHTML = `
+            ${createQuickItem("Manage Voters", "Add/Remove and verify voter rights", "admin-voters.html", "Go to Voters →")}
+            ${createQuickItem("Manage Candidates", "Manage candidate registration and status", "admin-candidates.html", "Go to Candidates →")}`;
+        } 
+        else if (role === "candidate") {
+          navTitle.innerText = "MFU Voting - Candidate";
+          subMenu.innerHTML = `
+            <a href="dashboard.html" class="nav-item active">📊 Dashboard</a>
+            <a href="candidate-manage.html" class="nav-item">⚙️ Manage Info</a>
+            <a href="results.html" class="nav-item">📈 Election Results</a>`;
+          
+          quickList.innerHTML = `
+            ${createQuickItem("Candidate Profile", "Update your policies and information", "candidate-manage.html", "Manage Info →")}
+            ${createQuickItem("Live Results", "Check the latest ranking status", "candidate-results.html", "View Results →")}`;
+        } 
+        else {
+          navTitle.innerText = "MFU Voting - Voter";
+          subMenu.innerHTML = `
+            <a href="dashboard.html" class="nav-item active">📊 Dashboard</a>
+            <a href="voter-candidates.html" class="nav-item">👥 Candidates</a>
+            <a href="voter-voting.html" class="nav-item">🗳️ Vote Now</a>
+            <a href="voter-history.html" class="nav-item">🕒 History</a>
+            <a href="results.html" class="nav-item">📈 Results</a>`;
+          quickList.innerHTML = `
+            ${createQuickItem("Your Voting Status", "Check if your vote has been recorded", "voter-history.html", "View History →")}
+            ${createQuickItem("Cast Your Vote", "Support your preferred candidate now", "voter-voting.html", "Vote Now →")}`;
+        }
+
+        fetch("http://localhost:3000/dashboard")
+          .then((res) => res.json())
+          .then((data) => {
+            // Logic สำหรับ Candidate: ดึงคะแนนตัวเอง (สมมติว่า API ส่งมาให้ หรือเรียก API เพิ่ม)
+            document.getElementById("stat-1-val").innerText = data.total_voters;
+            document.getElementById("stat-2-val").innerText = data.total_candidates;
+            document.getElementById("stat-3-val").innerText = data.voted_count;
+            document.getElementById("stat-4-val").innerText = (data.voted_percent ?? 0) + "%"; //ถ้าค่าเป็น null ให้แสดง 0 แทน
+
+          })
+          .catch(err => console.error("Error fetching data:", err));
+      });
+      
+
+      function createQuickItem(title, desc, link, linkText) {
+        return `
+          <div class="quick-item">
+            <div><strong class="quick-title">${title}</strong><p class="quick-desc">${desc}</p></div>
+            <a href="${link}" class="quick-link">${linkText}</a>
+          </div>`;
+      }
+
+      function logout() { localStorage.clear(); window.location.href = "index.html"; }
+    </script>
+  </body>
+</html>

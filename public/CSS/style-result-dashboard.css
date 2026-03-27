@@ -1,0 +1,112 @@
+/* style.css - Main Stylesheet for MFU Election App */
+:root {
+  --blue-primary: #1e3a8a;
+  --blue-voter: #2563eb;
+  --green-candidate: #16a34a;
+  --purple-admin: #9333ea;
+  --bg-light: #f8fafc;
+  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body { background-color: var(--bg-light); color: #1e293b; min-height: 100vh; }
+
+/* Navigation Bar */
+.navbar { padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; color: white; transition: 0.3s; }
+/* สี Navbar จะเปลี่ยนตาม Class ของ Body ที่ JavaScript เป็นคนใส่ให้ */
+.role-voter .navbar { background-color: var(--blue-voter); }
+.role-candidate .navbar { background-color: var(--green-candidate); }
+.role-admin .navbar { background-color: var(--purple-admin); }
+
+/* Layout Components */
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: var(--card-shadow); border: 1px solid #e2e8f0; }
+.btn { padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-block; text-align: center; }
+
+/* Logout Button Inside Navbar */
+.logout-btn { background: white; padding: 8px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; /* เพิ่มบรรทัดนี้เพื่อเอาเส้นใต้ออก */}
+.role-voter .logout-btn { color: var(--blue-voter); }
+.role-candidate .logout-btn { color: var(--green-candidate); }
+.role-admin .logout-btn { color: var(--purple-admin); }
+
+/* Grid & Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.stat-card { display: flex; justify-content: space-between; align-items: center; }
+.stat-value { font-size: 2rem; font-weight: 700; margin: 0.5rem 0; }
+
+/* Sub Navigation Links (เมนูใต้ Navbar) */
+.nav-links { background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px; position: fixed; top: 70px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; }
+.nav-item { text-decoration: none; color: #64748b; font-weight: 600; padding-bottom: 5px; border-bottom: 3px solid transparent; transition: 0.3s; }
+
+/* สีเส้นใต้เมนู Active ตาม Role */
+.role-voter .nav-item.active { color: var(--blue-voter); border-bottom-color: var(--blue-voter); }
+.role-candidate .nav-item.active { color: var(--green-candidate); border-bottom-color: var(--green-candidate); }
+.role-admin .nav-item.active { color: var(--purple-admin); border-bottom-color: var(--purple-admin); }
+
+/* Quick Access Items */
+.quick-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.03); transition: 0.3s; }
+.role-voter .quick-item { background: #eff6ff; }
+.role-candidate .quick-item { background: #f0fdf4; }
+.role-admin .quick-item { background: #f5f3ff; }
+
+.quick-title { display: block; font-size: 1.1rem; margin-bottom: 4px; font-weight: bold; }
+.role-voter .quick-title { color: #1e3a8a; }
+.role-candidate .quick-title { color: #14532d; }
+.role-admin .quick-title { color: #5b21b6; }
+
+.quick-desc { color: #64748b; font-size: 0.9rem; margin: 0; }
+.quick-link { font-weight: bold; text-decoration: none; }
+.role-voter .quick-link { color: var(--blue-voter); }
+.role-candidate .quick-link { color: var(--green-candidate); }
+.role-admin .quick-link { color: var(--purple-admin); }
+
+/* Tables & Forms */
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th { background: #f1f5f9; padding: 1rem; text-align: left; font-size: 0.85rem; color: #64748b; }
+td { padding: 1rem; border-bottom: 1px solid #f1f5f9; }
+
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.form-group input, .form-group textarea { width: 100%; padding: 0.75rem; border: 1.5px solid #e2e8f0; border-radius: 10px; background: #fcfcfd; }
+
+/* เว้นบรรทัดตรง dashboard */
+#dashboard-heading {
+    margin-bottom: 30px !important; /* ปรับตัวเลขได้ตามต้องการ */
+    margin-top: 0; /* แถม: ช่วยให้หัวข้อไม่ห่างจาก Navbar เกินไป */
+}
+
+/* สีของ Progress Bar ในหน้า Results */
+.role-voter .progress-bar { background-color: var(--blue-voter); }
+.role-candidate .progress-bar { background-color: var(--green-candidate); }
+.role-admin .progress-bar { background-color: var(--purple-admin); }
+
+/* เลือกสีจากตัวแปรใน style.css มาเก็บไว้ใน --role-color ตามแต่ละ Class ของ Body */
+.role-voter { 
+    --role-color: var(--blue-voter); 
+}
+.role-candidate { 
+    --role-color: var(--green-candidate); 
+}
+.role-admin { 
+    --role-color: var(--purple-admin); 
+}
+
+/* ช่อง Search: เมื่อกด (Focus) กรอบจะเปลี่ยนสีตาม Role */
+.search-input:focus {
+    border-color: var(--role-color) !important;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    outline: none;
+}
+
+/* ข้อความ Waiting... เปลี่ยนสีตาม Role */
+#current-leader {
+    color: var(--role-color) !important;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+/* ปรับสีไอคอนแว่นขยายให้ตรงกับ Role เมื่อมีการคลิกช่อง Search */
+.search-container:focus-within .search-icon {
+    color: var(--role-color);
+}
