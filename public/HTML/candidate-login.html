@@ -1,5 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Candidate Login - MFU Election</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0fdf4;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #16a34a;
+            color: white;
+            width: 100%;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div style="font-size: 2.5rem;">👤✅</div>
+        <h2 style="color: #16a34a;">Candidate Login</h2>
+        <form id="candidateLoginForm">
+            <div style="text-align: left; margin-bottom: 1rem;">
+                <label>Candidate ID</label>
+                <input type="text" id="candidate_id" required>
+            </div>
+            <div style="text-align: left; margin-bottom: 1.5rem;">
+                <label>Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Sign In</button>
+        </form>
+        <p style="font-size: 0.9rem; margin-top: 1.5rem;">New candidate? <a href="candidate-register.html"
+                style="color: #16a34a;">Register here</a></p>
+    </div>
+
+
+    <script>
+        document.querySelector('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const candidate_id = document.getElementById('candidate_id').value;
+            const password = document.getElementById('password').value;
+
+
+            const response = await fetch('/Candidate/Login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ candidate_id, password })
+            });
+
+            const data = await response.json();
+            alert(data.msg);
+            if (response.ok) window.location.href = data.redirect;
+        });
+    </script>
+</body>
+
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Candidate Login - MFU Election</title>
@@ -36,4 +128,4 @@
         </div>
     </div>
 </body>
-</html>
+</html> -->

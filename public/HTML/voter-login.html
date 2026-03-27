@@ -1,5 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Login - MFU Election</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f7ff;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .back-link {
+            margin-bottom: 20px;
+            display: block;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <a href="index.html" class="back-link">← Back to Home</a>
+        <div style="font-size: 3rem; margin-bottom: 10px;">🗳️</div>
+        <h2 style="color: #1e3a8a; margin-bottom: 5px;">Voter Login</h2>
+        <p style="color: #64748b; margin-bottom: 25px;">Please verify your identity to vote</p>
+
+        <form id="voterForm">
+            <div class="form-group">
+                <label>Citizen ID (13 Digits)</label>
+                <input type="text" id="citizen_id" placeholder="1234567890123" required>
+            </div>
+            <div class="form-group">
+                <label>Laser ID (Back of ID Card)</label>
+                <input type="text" id="laser_id" placeholder="AB12345678" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+
+    <script>
+        document.querySelector('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const citizen_id = document.getElementById('citizen_id').value;
+            const laser_id = document.getElementById('laser_id').value;
+
+
+            // เปลี่ยนเป็นรับส่งแบบ JSON
+            const response = await fetch('/Voter/Login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ citizen_id, laser_id })
+            });
+
+            const data = await response.json(); // อ่านค่า JSON ที่ส่งมาจาก server
+            alert(data.msg); // โชว์ข้อความแจ้งเตือน
+            if (response.ok) window.location.href = data.redirect; // เปลี่ยนหน้าตามที่ server บอก
+        });
+    </script>
+</body>
+
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Voter Login - MFU Election</title>
@@ -30,11 +151,11 @@
                 <a href="voter-dashboard.html" class="btn" style="background: #2563eb; color: white; width: 100%; text-align: center; display: block; text-decoration: none; padding: 10px 0; border-radius: 8px; font-weight: bold;">Login</a>
             </form>
 
-            <!-- <div style="margin-top: 2rem; padding: 1rem; background: #eff6ff; border-radius: 8px; font-size: 0.8rem; color: #1d4ed8;">
+            <div style="margin-top: 2rem; padding: 1rem; background: #eff6ff; border-radius: 8px; font-size: 0.8rem; color: #1d4ed8;">
                 <strong>Test Account:</strong><br>
                 ID: 1234567890123 / Laser: AB12345678
-            </div> -->
-        </div>
+            </div>
+</div>
     </div>
 </body>
-</html>
+</html> -->

@@ -1,5 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Candidate Registration - MFU Election</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0fdf4;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            background: #16a34a;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1 style="text-align: center; color: #15803d; margin-top: 0;">Candidate Register</h1>
+        <form id="registerForm">
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight:600;">Candidate ID</label>
+                <input type="text" id="candidate_id" placeholder="e.g. C004" required>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight:600;">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight:600;">Confirm Password</label>
+                <input type="password" id="confirmPass" placeholder="••••••••" required>
+            </div>
+            <button type="submit">Register Account</button>
+        </form>
+        <p style="text-align: center; margin-top: 15px;"><a href="candidate-login.html" style="color: #16a34a;">Back to
+                Login</a></p>
+    </div>
+
+
+    <script>
+        document.querySelector('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const candidate_id = document.getElementById('candidate_id').value;
+            const password = document.getElementById('password').value;
+
+
+            const response = await fetch('/Candidate/Register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ candidate_id, password })
+            });
+
+            const data = await response.json();
+            alert(data.msg);
+            if (response.ok) window.location.href = 'candidate-login.html';
+        });
+    </script>
+</body>
+
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +151,8 @@
         <!-- <footer style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 0.85rem;">
             © 2026 Mae Fah Luang University - All rights reserved
         </footer> -->
-    </div>
+</div>
 
 </body>
-</html>
+
+</html> -->

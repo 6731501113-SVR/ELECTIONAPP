@@ -5,6 +5,75 @@ const db = require("./db.js")
 
 // Serve static files from the public directory at root
 app.use(express.static(path.join(__dirname, "public")));
+// check database connection
+db.connect(err => {
+    if (err) console.log("❌ DB Connect Fail:", err.message);
+    else alert("✅ Database Connected (JSON Mode)");
+});
+
+// ======================================== LOGIN & REGISTER ========================================
+
+// --- ส่วนของ Voter Login ---
+app.post('/Voter/Login', (req, res) => {
+    const { citizen_id, laser_id } = req.body;
+    const sql = "SELECT * FROM voters WHERE citizen_id = ? AND laser_id = ?";
+    db.query(sql, [citizen_id, laser_id], (err, results) => {
+        if (err) return res.status(500).json({ status: 'error', msg: 'DB Error' });
+       
+        if (results.length > 0) {
+            // ส่งเป็น JSON แทนการส่งแค่ Text ชื่อไฟล์
+            res.status(200).json({
+                status: 'success',
+                redirect: 'voter-dashboard.html',
+                msg: 'เข้าสู่ระบบสำเร็จ'
+            });
+        } else {
+            res.status(401).json({ status: 'fail', msg: 'ข้อมูลไม่ถูกต้อง' });
+        }
+    });
+});
+
+
+// --- ส่วนของ Candidate Register ---
+app.post('/Candidate/Register', (req, res) => {
+    const { candidate_id, password } = req.body;
+    const sql = "INSERT INTO candidates (can_id, password) VALUES (?, ?)";
+    db.query(sql, [candidate_id, password], (err) => {
+        if (err) return res.status(500).json({ status: 'error', msg: 'ลงทะเบียนไม่สำเร็จ' });
+        res.status(200).json({ status: 'success', msg: 'ลงทะเบียนผู้สมัครสำเร็จ!' });
+    });
+});
+
+
+// --- ส่วนของ Candidate Login ---
+app.post('/Candidate/Login', (req, res) => {
+    const { candidate_id, password } = req.body;
+    const sql = "SELECT * FROM candidates WHERE can_id = ? AND password = ?";
+    db.query(sql, [candidate_id, password], (err, results) => {
+        if (err) return res.status(500).json({ status: 'error', msg: 'DB Error' });
+        if (results.length > 0) {
+            res.status(200).json({ status: 'success', redirect: 'candidate-dashboard.html', msg: 'ยินดีต้อนรับ' });
+        } else {
+            res.status(401).json({ status: 'fail', msg: 'รหัสหรือพาสเวิร์ดผิด' });
+        }
+    });
+});
+
+
+// --- ส่วนของ Admin Login ---
+app.post('/Admin/Login', (req, res) => {
+    const { username, password } = req.body;
+    const sql = "SELECT * FROM admin WHERE username = ? AND password = ?";
+    db.query(sql, [username, password], (err, results) => {
+        if (err) return res.status(500).json({ status: 'error', msg: 'DB Error' });
+        if (results.length > 0) {
+            res.status(200).json({ status: 'success', redirect: 'admin-dashboard.html', msg: 'Admin Login Success' });
+        } else {
+            res.status(401).json({ status: 'fail', msg: 'Admin Username/Password ผิด' });
+        }
+    });
+});
+
 
 // ======================================== DASHBOARD & RESULT ========================================
 

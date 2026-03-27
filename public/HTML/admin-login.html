@@ -1,5 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login - MFU Election</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #faf5ff;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #9333ea;
+            color: white;
+            width: 100%;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div style="font-size: 2.5rem;">🛡️</div>
+        <h2 style="color: #7c3aed;">System Admin</h2>
+        <form id="adminLoginForm">
+            <div style="text-align: left; margin-bottom: 1rem;">
+                <label>Username</label>
+                <input type="text" id="username" required>
+            </div>
+            <div style="text-align: left; margin-bottom: 1.5rem;">
+                <label>Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Access Control</button>
+        </form>
+    </div>
+
+
+    <script>
+        document.querySelector('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+
+            const response = await fetch('/Admin/Login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            alert(data.msg);
+            if (response.ok) window.location.href = data.redirect;
+        });
+    </script>
+</body>
+
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Admin Login - MFU Election</title>
@@ -31,4 +120,4 @@
         </div>
     </div>
 </body>
-</html>
+</html> -->
