@@ -44,10 +44,32 @@ app.post('/Voter/Login', (req, res) => {
 // --- ส่วนของ Candidate Register ---
 app.post('/Candidate/Register', (req, res) => {
     const { candidate_id, password } = req.body;
-    const sql = "INSERT INTO candidates (can_id, password) VALUES (?, ?)";
-    db.query(sql, [candidate_id, password], (err) => {
-        if (err) return res.status(500).json({ status: 'error', msg: 'ลงทะเบียนไม่สำเร็จ' });
-        res.status(200).json({ status: 'success', msg: 'ลงทะเบียนผู้สมัครสำเร็จ!' });
+
+    const sql = `
+        UPDATE candidates 
+        SET password = ? 
+        WHERE can_id = ? AND password IS NULL
+    `;
+
+    db.query(sql, [password, candidate_id], (err, result) => {
+        if (err) {
+            return res.status(500).json({
+                status: 'error',
+                msg: 'เกิดข้อผิดพลาด'
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(401).json({
+                status: 'error',
+                msg: 'ผู้สมัครนี้ได้ลงทะเบียนแล้วหรือไม่มีไอดีนี้ในระบบ'
+            });
+        }
+
+        res.status(200).json({
+            status: 'success',
+            msg: 'ลงทะเบียนสำเร็จ'
+        });
     });
 });
 
@@ -369,7 +391,7 @@ app.get('/admin/candidates', (req, res) => {
 // POST /admin/candidates - Add new candidate
 app.post('/admin/candidates', (req, res) => {
     const { can_id, password, name, personal_info, policy, is_active } = req.body;
-    if (!can_id || !password || !name) {
+    if (!can_id) {
         return res.status(401).json({ error: 'Bad Request', message: 'can_id, password, name are required' });
     }
     const insertSql = "INSERT INTO candidates (can_id, password, name, personal_info, policy, vote_score, is_active) VALUES (?, ?, ?, ?, ?, 0, ?)";
