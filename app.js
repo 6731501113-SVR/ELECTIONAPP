@@ -2,6 +2,9 @@ const express = require("express");
 const path = require("path")
 const app = express();
 const db = require("./db.js")
+const session = require('express-session');
+const MemoryStore = require('memorystore')(session);
+
 
 // Serve static files from the public directory at root
 app.use(express.static(path.join(__dirname, "public")));
@@ -359,6 +362,7 @@ app.get('/admin/voters', (req, res) => {
             return res.status(500).json({ error: 'Server error', message: err.message });
         }
         return res.status(200).json({ success: true, data: results });
+        // .sendFile(path.join(__dirname, "public/HTML/admin-voters.html"))
     });
 });
 
@@ -384,18 +388,18 @@ app.get('/admin/candidates', (req, res) => {
         if (err) {
             return res.status(500).json({ error: 'Server error', message: err.message });
         }
-        return res.status(200).json({ success: true, data: results });
+        return res.status(200).json({ success: true, data: results }).sendFile(path);
     });
 });
 
 // POST /admin/candidates - Add new candidate
 app.post('/admin/candidates', (req, res) => {
-    const { can_id, password, name, personal_info, policy, is_active } = req.body;
+    const { can_id} = req.body;
     if (!can_id) {
         return res.status(401).json({ error: 'Bad Request', message: 'can_id, password, name are required' });
     }
-    const insertSql = "INSERT INTO candidates (can_id, password, name, personal_info, policy, vote_score, is_active) VALUES (?, ?, ?, ?, ?, 0, ?)";
-    db.query(insertSql, [can_id, password, name, personal_info || '', policy || '', is_active || 1], (err, result) => {
+    const insertSql = "INSERT INTO candidates (can_id) VALUES (?)";
+    db.query(insertSql, [can_id], (err, result) => {
         if (err) {
             return res.status(500).json({ error: 'Server error', message: err.message });
         }
