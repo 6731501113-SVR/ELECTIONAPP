@@ -165,7 +165,7 @@
       function fetchResults(searchTerm = "") {
         const rankingList = document.getElementById("ranking-list");
 
-        fetch(`http://localhost:3000/results?search=${searchTerm}`)
+        fetch(`/results?search=${searchTerm}`)
           .then((res) => res.json())
           .then((data) => {
             document.getElementById("total-votes").innerText = data.total_votes_cast;

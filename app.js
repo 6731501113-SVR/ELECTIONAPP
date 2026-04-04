@@ -6,7 +6,6 @@ const argon2 = require('argon2');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 
-
 // Serve static files from the public directory at root
 app.use(express.static(path.join(__dirname, "public")));
 // Middleware to parse JSON and URL-encoded bodies
@@ -49,7 +48,9 @@ app.post('/Voter/Login', (req, res) => {
         if (voter.is_active === 0) {
             return res.status(403).json({ status: 'fail', msg: 'บัญชีถูกปิดใช้งาน' });
         }
-
+        req.session.citizen_id = citizen_id;
+        req.session.role = 'voter';
+        req.session.isLoggedIn = true;
         res.status(200).json({
             status: 'success',
             redirect: 'voter-dashboard.html',
@@ -68,8 +69,8 @@ app.post('/Candidate/Register', (req, res) => {
         SET password = ? 
         WHERE can_id = ? AND password IS NULL
     `;
-
-    db.query(sql, [password, candidate_id], (err, result) => {
+    passwordHash = argon2.hash(password);
+    db.query(sql, [passwordHash, candidate_id], (err, result) => {
         if (err) {
             return res.status(500).json({
                 status: 'error',
@@ -151,6 +152,8 @@ app.post('/Admin/Login', (req, res) => {
     db.query(sql, [username, password], (err, results) => {
         if (err) return res.status(500).json({ status: 'error', msg: 'DB Error' });
         if (results.length > 0) {
+            req.session.role = 'admin';
+            req.session.isLoggedIn = true;
             res.status(200).json({ status: 'success', redirect: 'admin-dashboard.html', msg: 'Admin Login Success' });
         } else {
             res.status(401).json({ status: 'fail', msg: 'Admin Username/Password ผิด' });
@@ -162,49 +165,50 @@ app.post('/Admin/Login', (req, res) => {
 // ======================================== DASHBOARD & RESULT ========================================
 
 // API: /dashboard (ดึงสถิติรวมสำหรับ Dashboard)
-app.get('/dashboard', (req, res) => {
-    // Query voters count
-    db.query("SELECT COUNT(*) AS total FROM voters", (errVoters, resVoters) => {
-        if (errVoters) return res.status(500).json({ error: 'Server error', message: errVoters.message });
+app.get('/dashboard', async (req, res) => {
+    try {
+        const [
+            [resVoters],
+            [resCandidates],
+            [resVoted]
+        ] = await Promise.all([
+            db.query("SELECT COUNT(*) AS total FROM voters"),
+            db.query("SELECT COUNT(*) AS total FROM candidates"),
+            db.query("SELECT COUNT(*) AS total FROM voters WHERE has_voted = 1")
+        ]);
 
         const totalVoters = resVoters[0].total;
+        const totalCandidates = resCandidates[0].total;
+        const votedCount = resVoted[0].total;
 
-        // Query candidates count
-        db.query("SELECT COUNT(*) AS total FROM candidates", (errCandidates, resCandidates) => {
-            if (errCandidates) return res.status(500).json({ error: 'Server error', message: errCandidates.message });
+        // คำนวณเปอร์เซ็นต์ 
+        const participationPercent = totalVoters > 0
+            ? parseFloat(((votedCount / totalVoters) * 100).toFixed(2))
+            : 0;
 
-            const totalCandidates = resCandidates[0].total;
-
-            // Query voted count
-            db.query("SELECT COUNT(*) AS total FROM voters WHERE has_voted = 1", (errVoted, resVoted) => {
-                if (errVoted) return res.status(500).json({ error: 'Server error', message: errVoted.message });
-
-                const votedCount = resVoted[0].total;
-
-                // คำนวณเปอร์เซ็นต์
-                const participationPercent = totalVoters > 0
-                    ? parseFloat(((votedCount / totalVoters) * 100).toFixed(2))
-                    : 0;
-
-                res.status(200).json({
-                    total_voters: totalVoters,
-                    total_candidates: totalCandidates,
-                    voted_count: votedCount,
-                    voted_percent: participationPercent
-                });
-            });
+        res.json({
+            // Query 1: นับจำนวน Voter ทั้งหมด
+            total_voters: totalVoters,
+            // Query 2: นับจำนวน Candidate ทั้งหมด
+            total_candidates: totalCandidates,
+            // Query 3: นับจำนวนคนที่โหวตไปแล้ว
+            voted_count: votedCount,
+            voted_percent: participationPercent
         });
-    });
+    } catch (err) {
+        console.error('Dashboard Error:', err);
+        res.status(500).json({ error: 'Server error', message: err.message });
+    }
+
 });
 
 // API: /results (ดึงผลคะแนนและการจัดอันดับ)
-app.get('/results', (req, res) => {
-    const searchQuery = req.query.search || '';
+app.get('/results', async (req, res) => {
+    try {
+        const searchQuery = req.query.search || '';
 
-    // 1. หาผลรวมคะแนนทั้งหมดก่อน
-    db.query("SELECT SUM(vote_score) AS total_votes FROM candidates", (errTotal, totalRes) => {
-        if (errTotal) return res.status(500).json({ error: 'Server error', message: errTotal.message });
-
+        // 1. หาผลรวมคะแนนทั้งหมดก่อน
+        const [totalRes] = await db.query("SELECT SUM(vote_score) AS total_votes FROM candidates");
         const totalVotesCast = totalRes[0].total_votes || 0;
 
         // 2. ดึงรายชื่อ Candidate พร้อมจัดอันดับ
@@ -214,24 +218,28 @@ app.get('/results', (req, res) => {
       WHERE name LIKE ? OR can_id LIKE ?
       ORDER BY vote_score DESC`;
 
-        db.query(qRanking, [`%${searchQuery}%`, `%${searchQuery}%`], (errRanking, results) => {
-            if (errRanking) return res.status(500).json({ error: 'Server error', message: errRanking.message });
+        const [results] = await db.query(qRanking, [`%${searchQuery}%`, `%${searchQuery}%`]);
 
-            // 3. Map ข้อมูลเพื่อคำนวณ % รายบุคคล
-            const ranking = results.map(can => ({
-                ...can,
-                candidate_score_percent: totalVotesCast > 0
-                    ? ((can.votes_received / totalVotesCast) * 100).toFixed(2)
-                    : "0.00"
-            }));
+        // 3. Map ข้อมูลเพื่อคำนวณ % รายบุคคล
+        const ranking = results.map(can => ({
+            ...can,
+            candidate_score_percent: totalVotesCast > 0
+                ? ((can.votes_received / totalVotesCast) * 100).toFixed(2)
+                : "0.00"
+        }));
 
-            res.status(200).json({
-                total_votes_cast: totalVotesCast,
-                ranking: ranking
-            });
+        res.json({
+            total_votes_cast: totalVotesCast,
+            ranking: ranking
         });
-    });
+
+    } catch (error) {
+        console.error('Results Error:', err);
+        res.status(500).json({ error: 'Server error', message: err.message });
+    }
+
 });
+
 
 // ======================================== VOTER ========================================
 
@@ -319,6 +327,52 @@ app.get('/Voter/history/:citizen_id', (req, res) => {
 });
 
 // ======================================== CANDIDATE ========================================
+// ดึงข้อมูลโปรไฟล์ของผู้สมัคร
+app.get('/candidate/profile', async (req, res) => {
+    // ดึงค่าจาก session ก่อน ถ้าไม่มีให้ไปดูที่ query string (ที่ส่งมาจาก URL)
+    const can_id = req.session.can_id || req.query.can_id;
+
+    console.log("Current can_id used:", can_id); // จะโชว์ค่าแทน undefined
+
+    if (!can_id) {
+        return res.status(401).json({ message: 'User ID not found' });
+    }
+
+    try {
+        const sql = "SELECT can_id, name, policy FROM candidates WHERE can_id = ?";
+        const [results] = await db.query(sql, [can_id]);
+        res.status(200).json(results[0] || {});
+    } catch (err) {
+        res.status(500).json({ error: 'DB Error', message: err.message });
+    }
+});
+
+// บันทึกการแก้ไข name, personal_info, policy (ปุ่ม Save Changes)
+app.put('/candidate/me', async (req, res) => {
+    // รับค่าจาก body
+    const { can_id, name, policy } = req.body;
+
+    try {
+        // เตรียมคำสั่ง SQL สำหรับการอัปเดตข้อมูล
+        const sql = "UPDATE candidates SET name = ?, policy = ? WHERE can_id = ?";
+
+        // รันคำสั่ง SQL ผ่าน Database Pool
+        await db.query(sql, [name, policy, can_id]);
+
+        // กรณีสำเร็จ (Case 200): ส่งข้อความแจ้งเตือนกลับไป
+        res.status(200).json({
+            message: 'Profile updated successfully'
+        });
+
+    } catch (err) {
+        // กรณีเกิดข้อผิดพลาด (Case 500): เช่น Database หลุด หรือ SQL ผิดพลาด
+        console.error('Update Error:', err);
+        res.status(500).json({
+            error: 'DB Error',
+            message: err.message
+        });
+    }
+});
 
 app.get('/Candidate/me', (req, res) => {
     const can_id = req.query.can_id || req.body?.can_id;
@@ -346,58 +400,53 @@ app.get('/Candidate/me', (req, res) => {
     });
 });
 
-// บันทึกการแก้ไข name, personal_info, policy (ปุ่ม Save Changes)
-app.put('/Candidate/me', (req, res) => {
-    const can_id = req.query.can_id || req.body?.can_id;
-    const { name, personal_info, policy } = req.body || {};
+// // บันทึกการแก้ไข name, personal_info, policy (ปุ่ม Save Changes)
+// app.put('/Candidate/me', (req, res) => {
+//     const can_id = req.query.can_id || req.body?.can_id;
+//     const { name, personal_info, policy } = req.body || {};
 
-    if (!can_id) {
-        return res.status(401).json({ error: 'Bad Request', message: 'can_id is required (query or body)' });
-    }
-    if (!name && !personal_info && !policy) {
-        return res.status(400).json({ error: 'Validation Error', message: 'Please provide at least one field to update' });
-    }
-    if (name !== undefined && name.trim() === '') {
-        return res.status(400).json({ error: 'Validation Error', message: 'name must not be empty' });
-    }
+//     if (!can_id) {
+//         return res.status(401).json({ error: 'Bad Request', message: 'can_id is required (query or body)' });
+//     }
+//     if (!name && !personal_info && !policy) {
+//         return res.status(400).json({ error: 'Validation Error', message: 'Please provide at least one field to update' });
+//     }
+//     if (name !== undefined && name.trim() === '') {
+//         return res.status(400).json({ error: 'Validation Error', message: 'name must not be empty' });
+//     }
 
-    const fields = [];
-    const values = [];
+//     const fields = [];
+//     const values = [];
 
-    if (name !== undefined) {
-        fields.push('name = ?');
-        values.push(name.trim());
-    }
-    if (personal_info !== undefined) {
-        fields.push('personal_info = ?');
-        values.push(personal_info);
-    }
-    if (policy !== undefined) {
-        fields.push('policy = ?');
-        values.push(policy);
-    }
+//     if (name !== undefined) {
+//         fields.push('name = ?');
+//         values.push(name.trim());
+//     }
+//     if (personal_info !== undefined) {
+//         fields.push('personal_info = ?');
+//         values.push(personal_info);
+//     }
+//     if (policy !== undefined) {
+//         fields.push('policy = ?');
+//         values.push(policy);
+//     }
 
-    values.push(can_id);
-    const sql = `UPDATE candidates SET ${fields.join(', ')} WHERE can_id = ?`;
+//     values.push(can_id);
+//     const sql = `UPDATE candidates SET ${fields.join(', ')} WHERE can_id = ?`;
 
-    db.query(sql, values, (err) => {
-        if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
-        }
+//     db.query(sql, values, (err) => {
+//         if (err) {
+//             return res.status(500).json({ error: 'Server error', message: err.message });
+//         }
 
-        db.query('SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?', [can_id], (err2, rows) => {
-            if (err2) {
-                return res.status(500).json({ error: 'Server error', message: err2.message });
-            }
-            return res.status(200).json({ success: true, message: 'Profile updated successfully', data: rows[0] });
-        });
-    });
-});
-
-
-
-
-
+//         db.query('SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?', [can_id], (err2, rows) => {
+//             if (err2) {
+//                 return res.status(500).json({ error: 'Server error', message: err2.message });
+//             }
+//             return res.status(200).json({ success: true, message: 'Profile updated successfully', data: rows[0] });
+//         });
+//     });
+// });
 
 // ======================================== ADMIN ========================================
 

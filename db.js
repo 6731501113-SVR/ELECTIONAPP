@@ -6,5 +6,5 @@ const con = mysql.createPool({
     database: 'election',
     waitForConnections: true,
     connectionLimit: 10
-});
+}).promise(); // Enable promise-based queries
 module.exports = con;

@@ -81,7 +81,7 @@
 
     <script>
        
-        fetch('http://localhost:3000/voter/candidates')
+        fetch('/Voter/candidates')
             .then(response => response.json()) 
             .then(data => {
                 const grid = document.getElementById('candidateGrid');

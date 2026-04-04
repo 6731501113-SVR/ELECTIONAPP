@@ -119,7 +119,7 @@
         // ==========================================
         // 1. ดึงข้อมูลผู้สมัครมาแสดงเป็นตัวเลือก 
         // ==========================================
-        fetch('http://localhost:3000/candidates')
+        fetch('/Voter/candidates')
             .then(response => response.json())
             .then(data => {
                 const list = document.getElementById('candidateList');
@@ -188,7 +188,7 @@
 
 
                 // ส่ง POST Request ไปหา API /vote
-                fetch('http://localhost:3000/vote', {
+                fetch('/Voter/vote', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -178,7 +178,7 @@
             ${createQuickItem("Cast Your Vote", "Support your preferred candidate now", "voter-voting.html", "Vote Now →")}`;
         }
 
-        fetch("http://localhost:3000/dashboard")
+        fetch("/dashboard")
           .then((res) => res.json())
           .then((data) => {
             // Logic สำหรับ Candidate: ดึงคะแนนตัวเอง (สมมติว่า API ส่งมาให้ หรือเรียก API เพิ่ม)
