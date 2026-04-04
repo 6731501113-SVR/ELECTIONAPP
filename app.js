@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path")
 const app = express();
 const db = require("./db.js")
+const argon2 = require('argon2');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 
@@ -11,10 +12,24 @@ app.use(express.static(path.join(__dirname, "public")));
 // Middleware to parse JSON and URL-encoded bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Session Configuration 
+app.use(session({
+    secret: 'my-secret-key',
+    resave: false,
+    saveUninitialized: false, // เปลี่ยนเป็น false เพื่อไม่ให้จองที่ว่างถ้าไม่จำเป็น
+    cookie: {
+        secure: false, // ถ้าไม่ได้ใช้ https ให้เป็น false
+        httpOnly: true,
+        sameSite: 'lax', // สำคัญมาก: ช่วยให้ Cookie ส่งข้ามระหว่าง Port 5500 และ 3000 ได้
+        maxAge: 24 * 60 * 60 * 1000 // ให้ session อยู่ได้ 1 วัน
+    },
+    store: new MemoryStore({ checkPeriod: 24 * 60 * 60 * 1000 }) // ล้าง session ที่หมดอายุทุก 24 ชั่วโมง
+}));
 // check database connection
-db.connect(err => {
+db.getConnection((err, connection) => {
     if (err) console.log("❌ DB Connect Fail:", err.message);
     else console.log("✅ Database Connected (JSON Mode)");
+    connection.release(); // Release the connection back to the pool
 });
 
 // ======================================== LOGIN & REGISTER ========================================
@@ -78,22 +93,54 @@ app.post('/Candidate/Register', (req, res) => {
 
 
 // --- ส่วนของ Candidate Login ---
-app.post('/Candidate/Login', (req, res) => {
+app.post('/Candidate/Login', async (req, res) => {
     const { candidate_id, password } = req.body;
-    const sql = "SELECT can_id, password, is_active FROM candidates WHERE can_id = ? AND password = ?";
-    db.query(sql, [candidate_id, password], (err, results) => {
-        if (err) return res.status(500).json({ status: 'error', msg: 'DB Error' });
-        if (results.length === 0) {
-            return res.status(401).json({ status: 'fail', msg: 'รหัสหรือพาสเวิร์ดผิด' });
+
+    try {
+        // 1. ใช้ await แทนการเขียน callback (err, results) => { ... }
+        // หมายเหตุ: [rows] คือการดึงผลลัพธ์ array ออกมาตัวเดียว (Destructuring)
+        const [rows] = await db.query(
+            "SELECT password, is_active FROM candidates WHERE can_id = ?",
+            [candidate_id]
+        );
+        // 2. ตรวจสอบว่าพบผู้ใช้ไหม
+        if (rows.length === 0) {
+            return res.status(401).json({ status: 'fail', msg: 'ไม่พบผู้ใช้งาน' });
+        }
+        const user = rows[0];
+        // 3. ตรวจสอบสถานะบัญชี
+        if (user.is_active === 0) {
+            return res.status(403).json({ status: 'fail', msg: 'บัญชีถูกปิดใช้งาน' });
+        }
+        // 4. ตรวจสอบรหัสผ่านด้วย Argon2
+        const isMatch = await argon2.verify(user.password, password);
+
+        if (isMatch) {
+            // ✅ SESSION - ใช้ key 'can_id' ให้ตรงกันทั้งโปรเจกต์
+            req.session.can_id = candidate_id;
+            req.session.role = 'candidate';
+            req.session.isLoggedIn = true;
+
+
+            // บันทึก Session และตอบกลับ
+            req.session.save((err) => {
+                if (err) throw err;
+                return res.status(200).json({
+                    status: 'success',
+                    redirect: 'candidate-dashboard.html',
+                    msg: 'เข้าสู่ระบบสำเร็จ'
+                });
+            });
+        } else {
+            return res.status(401).json({ status: 'fail', msg: 'รหัสผ่านไม่ถูกต้อง' });
         }
 
-        const candidate = results[0];
-        if (candidate.is_active === 0) {
-            return res.status(403).json({ status: 'fail', msg: 'บัญชีผู้สมัครถูกปิดใช้งาน' });
-        }
 
-        res.status(200).json({ status: 'success', redirect: 'candidate-dashboard.html', msg: 'ยินดีต้อนรับ' });
-    });
+    } catch (error) {
+        // จัดการ Error ทั้งหมดในที่เดียว (DB Error, Verification Error)
+        console.error("Login Error:", error);
+        return res.status(500).json({ status: 'error', msg: 'Server Error หรือ DB Error' });
+    }
 });
 
 
@@ -514,6 +561,15 @@ app.get("/pages/admin/candidates", (req, res) => {
 app.get("/", function (_req, res) {
     res.sendFile(path.join(__dirname, "public/HTML/index.html"));
 });
+
+// app.get('/password/:raw', async (req, res) => {
+//     try {
+//         const hash = await argon2.hash(req.params.raw);
+//         res.status(200).send(hash);
+//     } catch (err) {
+//         res.status(500).send('Error hashing password');
+//     }
+// });
 
 // start server at the specified port, if there is error, try another port number
 const port = 3000;
