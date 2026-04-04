@@ -369,9 +369,9 @@ app.get('/admin/voters', (req, res) => {
 // POST /admin/voters - Add new voter
 app.post('/admin/voters', (req, res) => {
     const { citizen_id, laser_id, name, } = req.body;
-    if (!citizen_id || !laser_id || !name) {
-        return res.status(401).json({ error: 'Bad Request', message: 'citizen_id, laser_id, name are required' });
-    }
+    // if (!citizen_id || !laser_id || !name) {
+    //     return res.status(401).json({ error: 'Bad Request', message: 'citizen_id, laser_id, name are required' });
+    // }
     const insertSql = "INSERT INTO voters (citizen_id, laser_id, name, has_voted, is_active) VALUES (?, ?, ?, ?, ?)";
     db.query(insertSql, [citizen_id, laser_id, name, 0, 1], (err, result) => {
         if (err) {
@@ -388,22 +388,49 @@ app.get('/admin/candidates', (req, res) => {
         if (err) {
             return res.status(500).json({ error: 'Server error', message: err.message });
         }
-        return res.status(200).json({ success: true, data: results }).sendFile(path);
+        return res.status(200).json({ success: true, data: results });
     });
 });
 
 // POST /admin/candidates - Add new candidate
 app.post('/admin/candidates', (req, res) => {
-    const { can_id} = req.body;
-    if (!can_id) {
-        return res.status(401).json({ error: 'Bad Request', message: 'can_id, password, name are required' });
-    }
-    const insertSql = "INSERT INTO candidates (can_id) VALUES (?)";
-    db.query(insertSql, [can_id], (err, result) => {
+    const sqlLast = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
+    db.query(sqlLast, (err, result) => {
         if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
+            return res.status(500).json({ error: err.message });
         }
-        return res.status(200).json({ success: true, message: 'Candidate added successfully' });
+        let nextId = "C001";
+        if (result.length > 0) {
+            const lastId = result[0].can_id;
+            const num = parseInt(lastId.substring(1)) + 1;
+            nextId = "C" + num.toString().padStart(3, "0");
+        }
+        const insertSql = "INSERT INTO candidates (can_id) VALUES (?)";
+        db.query(insertSql, [nextId], (err2) => {
+            if (err2) {
+                return res.status(500).json({ error: err2.message });
+            }
+            res.status(200).json({
+                can_id: nextId
+            });
+        });
+    });
+});
+
+// GET next candidate ID
+app.get("/admin/candidates/next-id", (req, res) => {
+    const sql = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
+    db.query(sql, (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        let nextId = "C001";
+        if (result.length > 0) {
+            const lastId = result[0].can_id;
+            const num = parseInt(lastId.substring(1)) + 1;
+            nextId = "C" + num.toString().padStart(3, "0");
+        }
+        res.status(200).json({ can_id: nextId });
     });
 });
 
@@ -476,6 +503,12 @@ app.put('/admin/control', (req, res) => {
     });
 });
 
+// ======================================== ROUTE ========================================
+
+//candidates page
+app.get("/pages/admin/candidates", (req, res) => {
+    res.sendFile(path.join(__dirname, "public/HTML/admin-candidates.html"));
+});
 
 //root
 app.get("/", function (_req, res) {

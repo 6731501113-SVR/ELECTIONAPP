@@ -1,91 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Candidates - Admin Portal</title>
     <link rel="stylesheet" href="../CSS/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; }
-        
-        .search-box { position: relative; max-width: 450px; margin-bottom: 25px; }
-        .search-box input { 
-            width: 100%; padding: 12px 12px 12px 45px; 
-            border: 1.5px solid #e2e8f0; border-radius: 12px; 
-            font-size: 0.95rem; transition: 0.3s; outline: none;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            margin: 0;
         }
-        .search-box input:focus { 
-            border-color: #9333ea; 
-            box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.1); 
-        }
-        .search-box span { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
 
-        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
+        .search-box {
+            position: relative;
+            max-width: 450px;
+            margin-bottom: 25px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 12px 12px 45px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #9333ea;
+            box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.1);
+        }
+
+        .search-box span {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 700px;
+        }
 
         @media (max-width: 768px) {
-            .navbar h2 { font-size: 1.1rem !important; }
-            .container { margin-top: 220px !important; }
+            .navbar h2 {
+                font-size: 1.1rem !important;
+            }
+
+            .container {
+                margin-top: 220px !important;
+            }
         }
     </style>
 </head>
+
 <body style="display: block;">
 
-    <nav class="navbar admin" style="background-color: #9333ea; color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; height: 70px; z-index: 1000; box-sizing: border-box;">
+    <nav class="navbar admin"
+        style="background-color: #9333ea; color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; height: 70px; z-index: 1000; box-sizing: border-box;">
         <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; white-space: nowrap;">MFU Voting - Admin</h2>
-        <a href="index.html" class="btn" style="background: white; color: #9333ea; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; flex-shrink: 0;">Logout</a>
+        <a href="index.html" class="btn"
+            style="background: white; color: #9333ea; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; flex-shrink: 0;">Logout</a>
     </nav>
 
-    <div class="nav-links" style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 70px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
-        <a href="admin-dashboard.html" style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">📊 Dashboard</a>
-        <a href="admin-voters.html" style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">👥 Voters</a>
-        <a href="admin-candidates.html" style="text-decoration: none; color: #9333ea; font-weight: 600; border-bottom: 3px solid #9333ea; padding-bottom: 5px;">👤 Candidates</a>
-        <a href="admin-control.html" style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">⚙️ Control</a>
-        <a href="admin-results.html" style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">📈 Results</a>
+    <div class="nav-links"
+        style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 70px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
+        <a href="admin-dashboard.html"
+            style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">📊
+            Dashboard</a>
+        <a href="admin-voters.html"
+            style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">👥
+            Voters</a>
+        <a href="admin-candidates.html"
+            style="text-decoration: none; color: #9333ea; font-weight: 600; border-bottom: 3px solid #9333ea; padding-bottom: 5px;">👤
+            Candidates</a>
+        <a href="admin-control.html"
+            style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">⚙️
+            Control</a>
+        <a href="admin-results.html"
+            style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">📈
+            Results</a>
     </div>
 
-    <div class="container" style="margin-top: 170px; max-width: 1100px; margin-left: auto; margin-right: auto; padding: 20px;">
+    <div class="container"
+        style="margin-top: 170px; max-width: 1100px; margin-left: auto; margin-right: auto; padding: 20px;">
         <h1 style="margin-bottom: 40px; color: #1e293b;">Manage Candidates</h1>
 
-        <div class="card" style="background: white; padding: 35px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 40px;">
-            <h3 style="margin-bottom: 25px; color: #1e293b;">Approve Candidate Application</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; align-items: end;">
-                <div><label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Candidate ID</label><input type="text" placeholder="e.g. C004" style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;"></div>
-                <button style="background: #7c3aed; color: white; padding: 12px 25px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer;">+ Add Candidate</button>
+        <div class="card"
+            style="background: white; padding: 35px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 40px;">
+            <h3 style="margin-bottom: 25px; color: #1e293b;">Add New Candidate ID</h3>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; align-items: end;">
+                <div><label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Candidate
+                        ID</label><input type="text" id="can-input"
+                        style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;" disabled>
+                </div>
+                <button id="add-button"
+                    style="background: #7c3aed; color: white; padding: 12px 25px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer;">+
+                    Add Candidate</button>
             </div>
-            <p style="font-size: 0.8rem; color: #64748b; margin-top: 15px;">New candidates will be created with default password: "newcandidate123"</p>
-            <!-- <table>
-                    <thead>
-                        <tr style="background: #f8fafc; color: #64748b; font-size: 0.9rem;">
-                            <th style="padding: 15px; border-bottom: 2px solid #f1f5f9;">ID</th>
-                            <th style="padding: 15px; border-bottom: 2px solid #f1f5f9;">Full Name</th>
-                            <th style="padding: 15px; border-bottom: 2px solid #f1f5f9; text-align: center;">Approve</th>
-                            <th style="padding: 15px; border-bottom: 2px solid #f1f5f9; text-align: center;">Decline</th>
-                        </tr>
-                    </thead>
-                    <tbody style="color: #334155; font-size: 0.95rem;">
-                        <tr>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">C001</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">Dr. Anon Meekwamroo</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;"><button style="padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #dcfce7; color: #475569; border: 1px solid #e2e8f0;">Approve</button></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;"><button style="padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #fcdcdc; color: #475569; border: 1px solid #e2e8f0;">Decline</button></td>
-                        </tr>
-                    </tbody>
-                </table> -->
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 15px;">New candidates will be created with default
+                password: ""</p>
         </div>
 
-        <div class="card" style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <div class="card"
+            style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="margin: 0; color: #1e293b;">Candidate List</h3>
-                <span style="background: #f1f5f9; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; color: #64748b;">3 Profiles Active</span>
+                <span id="active-count"
+                    style="background: #f1f5f9; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; color: #64748b;"></span>
             </div>
 
             <div class="search-box">
                 <span>🔍</span>
-                <input type="text" placeholder="Search by Name, ID...">
+                <input type="text" id="search-input" placeholder="Search by Name, ID...">
             </div>
-            
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -97,32 +142,201 @@
                             <th style="padding: 15px; border-bottom: 2px solid #f1f5f9; text-align: center;">Action</th>
                         </tr>
                     </thead>
-                    <tbody style="color: #334155; font-size: 0.95rem;">
+                    <tbody id="candidate-table" style="color: #334155; font-size: 0.95rem;">
+                    </tbody>
+                    <!-- <tbody style="color: #334155; font-size: 0.95rem;">
                         <tr>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">C001</span></td>
+                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span
+                                    style="background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">C001</span>
+                            </td>
                             <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">Dr. Anon Meekwamroo</td>
                             <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; font-weight: bold;">120</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Active</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;"><button style="padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">Disable</button></td>
+                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span
+                                    style="background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Active</span>
+                            </td>
+                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;"><button
+                                    style="padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">Disable</button>
+                            </td>
                         </tr>
-                        <tr>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">C002</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">Asst. Prof. Suda Pattana</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; font-weight: bold;">95</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Active</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;"><button style="padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">Disable</button></td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">C003</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">Mr. Prasit Kaona</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; font-weight: bold;">85</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Active</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;"><button style="padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">Disable</button></td>
-                        </tr>
-                    </tbody>
+                    </tbody> -->
                 </table>
             </div>
         </div>
     </div>
+    <script>
+        async function loadNextID() {
+            const res = await fetch("/admin/candidates/next-id");
+            const data = await res.json();
+            document.getElementById("can-input").value = data.can_id;
+        }
+
+        document.querySelector("#add-button").addEventListener("click", async () => {
+            const res = await fetch("/admin/candidates", {
+                method: "POST"
+            });
+
+            const data = await res.json();
+
+            if (data.can_id) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Candidate Added",
+                    text: "Add " + data.can_id + " เรียบร้อยแล้ว",
+                    confirmButtonColor: "#7c3aed"
+                });
+                loadNextID();
+                loadCandidates();
+            }
+            else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "ไม่สามารถเพิ่ม Candidate ได้"
+                });
+            }
+
+        });
+
+        async function loadCandidates() {
+            const res = await fetch("/admin/candidates");
+            const data = await res.json();
+            const tbody = document.getElementById("candidate-table");
+            tbody.innerHTML = "";
+            const fragment = document.createDocumentFragment();
+            let activeCount = 0;
+
+            data.data.forEach(c => {
+                const tr = document.createElement("tr");
+                // ID
+                const tdId = document.createElement("td");
+                tdId.style.padding = "20px";
+                tdId.style.borderBottom = "1px solid #f1f5f9";
+
+                const spanId = document.createElement("span");
+                spanId.textContent = c.can_id;
+                spanId.style.background = "#1e293b";
+                spanId.style.color = "white";
+                spanId.style.padding = "4px 10px";
+                spanId.style.borderRadius = "6px";
+                spanId.style.fontSize = "0.85rem";
+
+                tdId.appendChild(spanId);
+
+                // Name
+                const tdName = document.createElement("td");
+                tdName.style.padding = "20px";
+                tdName.style.borderBottom = "1px solid #f1f5f9";
+                tdName.textContent = c.name ?? "-";
+
+                // Vote
+                const tdVote = document.createElement("td");
+                tdVote.style.padding = "20px";
+                tdVote.style.borderBottom = "1px solid #f1f5f9";
+                tdVote.style.fontWeight = "bold";
+                tdVote.textContent = c.vote_score ?? 0;
+
+                // Status
+                const tdStatus = document.createElement("td");
+                tdStatus.style.padding = "20px";
+                tdStatus.style.borderBottom = "1px solid #f1f5f9";
+
+                const statusSpan = document.createElement("span");
+                statusSpan.textContent = c.is_active ? "Active" : "Disabled";
+                statusSpan.style.padding = "6px 15px";
+                statusSpan.style.borderRadius = "20px";
+                statusSpan.style.fontSize = "0.85rem";
+                statusSpan.style.fontWeight = "600";
+
+                if (c.is_active) {
+                    statusSpan.style.background = "#dcfce7";
+                    statusSpan.style.color = "#166534";
+                } else {
+                    statusSpan.style.background = "#fee2e2";
+                    statusSpan.style.color = "#991b1b";
+                }
+
+                tdStatus.appendChild(statusSpan);
+
+                // Action
+                const tdAction = document.createElement("td");
+                tdAction.style.padding = "20px";
+                tdAction.style.borderBottom = "1px solid #f1f5f9";
+                tdAction.style.textAlign = "center";
+
+                const button = document.createElement("button");
+
+                const nextStatus = c.is_active ? 0 : 1;
+                button.textContent = c.is_active ? "Disable" : "Enable";
+
+                button.style.padding = "6px 15px";
+                button.style.borderRadius = "20px";
+                button.style.fontSize = "0.85rem";
+                button.style.fontWeight = "600";
+                button.style.cursor = "pointer";
+                button.style.background = "#f1f5f9";
+                button.style.color = "#475569";
+                button.style.border = "1px solid #e2e8f0";
+
+                button.onclick = () => toggleCandidate(c.can_id, nextStatus);
+
+                tdAction.appendChild(button);
+
+                // append td -> tr
+                tr.appendChild(tdId);
+                tr.appendChild(tdName);
+                tr.appendChild(tdVote);
+                tr.appendChild(tdStatus);
+                tr.appendChild(tdAction);
+
+                fragment.appendChild(tr);
+
+                // Count active candidates
+                if (c.is_active) activeCount++;
+            });
+            tbody.appendChild(fragment);
+            document.getElementById("active-count").textContent = activeCount + " Profiles Active";
+        }
+        async function toggleCandidate(can_id, status) {
+
+            const res = await fetch("/admin/candidates/" + can_id, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    is_active: status
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Updated",
+                    text: "Candidate " + can_id + " updated"
+                });
+                loadCandidates();
+            }
+        }
+        document.getElementById("search-input").addEventListener("keyup", function () {
+            const keyword = this.value.toLowerCase();
+            const rows = document.querySelectorAll("#candidate-table tr");
+            
+            rows.forEach(row => {
+                const id = row.children[0].innerText.toLowerCase();
+                const name = row.children[1].innerText.toLowerCase();
+
+                if (id.includes(keyword) || name.includes(keyword)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+
+        loadNextID();
+        loadCandidates();
+    </script>
 </body>
+
 </html>

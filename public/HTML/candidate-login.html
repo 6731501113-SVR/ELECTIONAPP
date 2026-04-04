@@ -73,11 +73,10 @@
             const candidate_id = document.getElementById('candidate_id').value;
             const password = document.getElementById('password').value;
 
-
             const response = await fetch('/Candidate/Login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ candidate_id, password })
+                boyd: JSON.stringify({ candidate_id, password })
             });
 
             const data = await response.json();
