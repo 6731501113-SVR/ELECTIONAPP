@@ -72,37 +72,41 @@ app.post('/Voter/Login', async (req, res) => {
 });
 
 
-// --- ส่วนของ Candidate Register ---
+// candidate-register
 app.post('/Candidate/Register', async (req, res) => {
+    const can_id = String(req.body.can_id || '').trim().toUpperCase();
+    const name = String(req.body.name || '').trim();
+    const policy = String(req.body.policy || '').trim();
+    const password = String(req.body.password || '');
+
+    if (!can_id || !name || !password) {
+        return res.status(400).json({ status: 'fail', msg: 'กรุณากรอกข้อมูลให้ครบถ้วน' });
+    }
+
     try {
-        const candidate_id = String(req.body.candidate_id || '').trim().toUpperCase();
-        const password = String(req.body.password || '').trim();
-        const passwordHash = await argon2.hash(password);
+        const checkSql = "SELECT password FROM candidates WHERE can_id = ?";
+        const [rows] = await db.query(checkSql, [can_id]);
 
-        const sql = `
-            UPDATE candidates 
-            SET password = ? 
-            WHERE can_id = ? AND password IS NULL
-        `;
-        const [result] = await db.query(sql, [passwordHash, candidate_id]);
-
-        if (result.affectedRows === 0) {
-            return res.status(401).json({
-                status: 'error',
-                msg: 'ผู้สมัครนี้ได้ลงทะเบียนแล้วหรือไม่มีไอดีนี้ในระบบ'
-            });
+        if (rows.length === 0) {
+            return res.status(400).json({ status: 'fail', msg: 'ไม่พบ Candidate ID นี้ในระบบ กรุณาติดต่อ Admin' });
         }
 
-        res.status(200).json({
-            status: 'success',
-            msg: 'ลงทะเบียนสำเร็จ'
-        });
+        if (rows[0].password) {
+            return res.status(400).json({ status: 'fail', msg: 'ID นี้ถูกลงทะเบียนไปแล้ว' });
+        }
+
+        const hashedPassword = await argon2.hash(password);
+        const updateSql = "UPDATE candidates SET name = ?, policy = ?, password = ?, is_active = 0 WHERE can_id = ?";
+        const [result] = await db.query(updateSql, [name, policy, hashedPassword, can_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(500).json({ status: 'error', msg: 'ลงทะเบียนไม่สำเร็จ' });
+        }
+
+        res.json({ status: 'success', msg: 'ลงทะเบียนสำเร็จ! โปรดรอการตรวจสอบจาก Admin' });
     } catch (error) {
-        console.error('Candidate Register Error:', error.message);
-        res.status(500).json({
-            status: 'error',
-            msg: 'เกิดข้อผิดพลาด: ' + error.message
-        });
+        console.error('Candidate Register Error:', error);
+        res.status(500).json({ status: 'error', msg: 'เกิดข้อผิดพลาด: ' + error.message });
     }
 });
 
@@ -132,7 +136,12 @@ app.post('/Candidate/Login', async (req, res) => {
         }
         const user = rows[0];
 
-        // 4. ตรวจสอบสถานะบัญช (is_active)
+        // 3.5. ตรวจสอบว่าลงทะเบียนหรือยัง
+        if (user.password === null) {
+            return res.status(402).json({ status: 'fail', msg: 'หมายเลขผู้สมัครนี้ยังไม่ได้ลงทะเบียน' });
+        }
+
+        // 4. ตรวจสอบสถานะบัญชี (is_active)
         if (user.is_active === 0) {
             return res.status(403).json({ status: 'fail', msg: 'บัญชีนี้ถูกปิดใช้งานชั่วคราว' });
         }

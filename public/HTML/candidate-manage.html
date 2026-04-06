@@ -72,7 +72,6 @@
     </div>
 
     <script>
-        const API = 'http://localhost:3000';
         let currentCanId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -87,7 +86,7 @@
 
                     currentCanId = data.can_id;
 
-                    fetch(`${API}/candidate/info?can_id=${currentCanId}`, {
+                    fetch(`/candidate/info?can_id=${currentCanId}`, {
                         method: 'GET',
                         credentials: 'include'
                     })
@@ -130,7 +129,7 @@
             }
 
             try {
-                const res = await fetch(`${API}/candidate/info`, {
+                const res = await fetch(`/candidate/info`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',

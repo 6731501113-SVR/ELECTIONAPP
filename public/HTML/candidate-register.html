@@ -3,88 +3,178 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidate Registration - MFU Election</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: sans-serif;
+            font-family: 'Inter', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #f0fdf4;
+            background: linear-gradient(to bottom right, #f0fdf4, #ecfdf5);
+            padding: 20px;
             margin: 0;
+        }
+
+        .container {
+            max-width: 450px;
+            width: 100%;
         }
 
         .card {
             background: white;
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border: 1px solid #dcfce7;
         }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 5px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            box-sizing: border-box;
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        button {
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input,
+        textarea {
             width: 100%;
-            background: #16a34a;
-            color: white;
             padding: 12px;
-            border: none;
+            border: 1.5px solid #e2e8f0;
             border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .btn {
+            width: 100%;
+            background-color: #16a34a;
+            color: white;
+            padding: 14px 0;
+            font-size: 1.1rem;
             font-weight: bold;
+            border: none;
+            border-radius: 12px;
             cursor: pointer;
-            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #15803d;
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <h1 style="text-align: center; color: #15803d; margin-top: 0;">Candidate Register</h1>
-        <form id="registerForm">
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight:600;">Candidate ID</label>
-                <input type="text" id="candidate_id" placeholder="e.g. C004" required>
+
+    <div class="container">
+        <div style="margin-bottom: 25px; display: flex; justify-content: center;">
+            <a href="/"
+                style="text-decoration: none; color: #64748b; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                ← Back to Home
+            </a>
+        </div>
+
+        <div class="card">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="font-size: 1.8rem; color: #15803d; margin-bottom: 10px;">Candidate Register</h1>
+                <p style="color: #64748b; font-size: 0.95rem;">กรุณากรอกรหัสผู้สมัครที่ได้รับจาก Admin</p>
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight:600;">Password</label>
-                <input type="password" id="password" placeholder="••••••••" required>
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight:600;">Confirm Password</label>
-                <input type="password" id="confirmPass" placeholder="••••••••" required>
-            </div>
-            <button type="submit">Register Account</button>
-        </form>
-        <p style="text-align: center; margin-top: 15px;"><a href="/pages/candidate/login" style="color: #16a34a;">Back to
-                Login</a></p>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Candidate ID (รหัสผู้สมัคร)</label>
+                    <input type="text" id="can_id" placeholder="เช่น C000" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Full Name (ชื่อ-นามสกุล)</label>
+                    <input type="text" id="name" placeholder="ระบุชื่อจริง นามสกุล" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Policy (นโยบาย)</label>
+                    <textarea id="policy" placeholder="ระบุนโยบายสั้นๆ" rows="3" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Create Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 30px;">
+                    <label>Confirm Password</label>
+                    <input type="password" id="confirmPass" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn">Register Account</button>
+
+                <div style="text-align: center; margin-top: 25px;">
+                    <p style="font-size: 0.9rem; color: #64748b;">
+                        Already have an account?
+                        <a href="/pages/candidate/login"
+                            style="color: #15803d; font-weight: 700; text-decoration: none;">Log in here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
     </div>
 
-
     <script>
-        document.querySelector('form').addEventListener('submit', async (e) => {
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const candidate_id = document.getElementById('candidate_id').value.trim().toUpperCase();
-            const password = document.getElementById('password').value.trim();
+            
+            // ดึงค่า can_id เพิ่มเข้ามา
+            const can_id = document.getElementById('can_id').value;
+            const name = document.getElementById('name').value;
+            const policy = document.getElementById('policy').value;
+            const password = document.getElementById('password').value;
+            const confirmPass = document.getElementById('confirmPass').value;
 
-            const response = await fetch('/Candidate/Register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ candidate_id, password })
-            });
+            // เช็คข้อมูลว่าง
+            if (!can_id || !name || !policy || !password) {
+                return alert('❌ กรุณากรอกข้อมูลให้ครบถ้วน');
+            }
 
-            const data = await response.json();
-            alert(data.msg);
-            if (response.ok) window.location.href = '/pages/candidate/login';
+            // เช็ครหัสผ่านให้ตรงกัน
+            if (password !== confirmPass) {
+                alert('❌ รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง');
+                return;
+            }
+
+            try {
+                // ส่งข้อมูลไปที่ API ที่เราสร้างไว้ (เพิ่ม can_id เข้าไปใน body)
+                const response = await fetch('/Candidate/Register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ can_id, name, policy, password })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    // เด้ง Alert แจ้งข้อความสำเร็จจากหลังบ้าน
+                    alert('✅ ' + data.msg);
+
+                    // ล้างข้อมูลในฟอร์ม เผื่อสมัครให้คนอื่นต่อ
+                    document.getElementById('registerForm').reset();
+
+                    // พาไปหน้า Login
+                    window.location.href = '/pages/candidate/login';
+                } else {
+                    alert('❌ เกิดข้อผิดพลาด: ' + data.msg);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง');
+            }
         });
     </script>
 </body>
