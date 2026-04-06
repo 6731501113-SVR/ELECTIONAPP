@@ -128,7 +128,7 @@ app.post('/Candidate/Login', async (req, res) => {
             [candidate_id]
         );
 
-        console.log('Candidate login attempt:', { candidate_id, found: rows.length > 0 });
+        // console.log('Candidate login attempt:', { candidate_id, found: rows.length > 0 }); for debugging
 
         // 3. กรณีไม่พบผู้ใช้งานในระบบ
         if (rows.length === 0) {
@@ -149,7 +149,7 @@ app.post('/Candidate/Login', async (req, res) => {
         // 5. ตรวจสอบรหัสผ่านด้วย Argon2 (Verify)
         // user.password คือ Hash จาก DB, password คือรหัสที่รับมาจากหน้าเว็บ
         const isMatch = await argon2.verify(user.password, password);
-        console.log('Candidate password verify result:', isMatch);
+        // console.log('Candidate password verify result:', isMatch); // for debugging
 
         if (isMatch) {
             // ✅ รหัสถูกต้อง: ทำการเซ็ต SESSION เพื่อยืนยันตัวตน
@@ -383,7 +383,7 @@ app.get('/candidate/profile', async (req, res) => {
     // ดึงค่าจาก session ก่อน ถ้าไม่มีให้ไปดูที่ query string (ที่ส่งมาจาก URL)
     const can_id = req.session.can_id || req.query.can_id;
 
-    console.log("Current can_id used:", can_id); // จะโชว์ค่าแทน undefined
+    // console.log("Current can_id used:", can_id); // จะโชว์ค่าแทน undefined
 
     if (!can_id) {
         return res.status(401).json({ message: 'User ID not found' });
