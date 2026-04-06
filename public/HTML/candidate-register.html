@@ -73,9 +73,8 @@
     <script>
         document.querySelector('form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const candidate_id = document.getElementById('candidate_id').value;
-            const password = document.getElementById('password').value;
-
+            const candidate_id = document.getElementById('candidate_id').value.trim().toUpperCase();
+            const password = document.getElementById('password').value.trim();
 
             const response = await fetch('/Candidate/Register', {
                 method: 'POST',

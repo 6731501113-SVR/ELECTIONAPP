@@ -162,11 +162,11 @@
               navTitle.innerText = "MFU Voting - Candidate";
               subMenu.innerHTML = `
                 <a href="/pages/candidate/dashboard" class="nav-item active">📊 Dashboard</a>
-                <a href="/pages/candidate/manage" class="nav-item">⚙️ Manage Info</a>
+                <a href="/pages/candidate/info" class="nav-item">📝 Info</a>
                 <a href="/pages/candidate/results" class="nav-item">📈 Election Results</a>`;
               
               quickList.innerHTML = `
-                ${createQuickItem("Candidate Profile", "Update your policies and information", "/pages/candidate/manage", "Manage Info →")}
+                ${createQuickItem("Candidate Profile", "Update your policies and information", "/pages/candidate/info", "View Info →")}
                 ${createQuickItem("Live Results", "Check the latest ranking status", "/pages/candidate/results", "View Results →")}`;
             } 
             else {

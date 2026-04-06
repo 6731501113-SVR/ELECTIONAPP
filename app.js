@@ -73,7 +73,8 @@ app.post('/Voter/Login', async (req, res) => {
 // --- ส่วนของ Candidate Register ---
 app.post('/Candidate/Register', async (req, res) => {
     try {
-        const { candidate_id, password } = req.body;
+        const candidate_id = String(req.body.candidate_id || '').trim().toUpperCase();
+        const password = String(req.body.password || '').trim();
         const passwordHash = await argon2.hash(password);
 
         const sql = `
@@ -106,20 +107,22 @@ app.post('/Candidate/Register', async (req, res) => {
 
 // --- ส่วนของ Candidate Login ---
 app.post('/Candidate/Login', async (req, res) => {
-    const { candidate_id, password } = req.body;
-
+    const candidate_id = String(req.body.candidate_id || '').trim().toUpperCase();
+    const password = String(req.body.password || '').trim();
 
     try {
-        // 1. ตรวจสอบว่ากรอกข้อมูลครบถ้วนหรือไม่ ไม่ต้อง ให้ frontend เช็คก้ได้
+        // 1. ตรวจสอบว่ากรอกข้อมูลครบถ้วนหรือไม่
         // if (!candidate_id || !password) {
         //     return res.status(400).json({ status: 'fail', msg: 'กรุณากรอก ID และรหัสผ่าน' });
         // }
+
         // 2. ดึงข้อมูลจาก Database
-        // ใช้ [rows] เพราะ db.js ของคุณใช้ .promise()
         const [rows] = await db.query(
             "SELECT password, is_active FROM candidates WHERE can_id = ?",
             [candidate_id]
         );
+
+        console.log('Candidate login attempt:', { candidate_id, found: rows.length > 0 });
 
         // 3. กรณีไม่พบผู้ใช้งานในระบบ
         if (rows.length === 0) {
@@ -135,6 +138,8 @@ app.post('/Candidate/Login', async (req, res) => {
         // 5. ตรวจสอบรหัสผ่านด้วย Argon2 (Verify)
         // user.password คือ Hash จาก DB, password คือรหัสที่รับมาจากหน้าเว็บ
         const isMatch = await argon2.verify(user.password, password);
+        console.log('Candidate password verify result:', isMatch);
+
         if (isMatch) {
             // ✅ รหัสถูกต้อง: ทำการเซ็ต SESSION เพื่อยืนยันตัวตน
             req.session.can_id = candidate_id;

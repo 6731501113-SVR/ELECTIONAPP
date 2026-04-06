@@ -228,15 +228,16 @@
                   result.can_id;
                 document.getElementById("display-name").innerText = result.name;
                 document.getElementById("display-policy").innerText =
-              result.policy;
-          }
-        })
-        .catch((err) => {
-          console.error("Fetch Error:", err);
-          // กรณีเกิด Error ให้ลองแจ้งเตือนผู้ใช้
-          alert(
-            "Failed to load candidate information. Please try logging in again.",
-          );
+                  result.policy;
+              }
+            })
+            .catch((err) => {
+              console.error("Fetch Error:", err);
+              // กรณีเกิด Error ให้ลองแจ้งเตือนผู้ใช้
+              alert(
+                "Failed to load candidate information. Please try logging in again.",
+              );
+            });
         });
     });
   </script>

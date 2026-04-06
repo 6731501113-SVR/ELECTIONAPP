@@ -160,7 +160,7 @@
               subMenu.innerHTML = `<a href="/pages/admin/dashboard" class="nav-item">📊 Dashboard</a><a href="/pages/admin/voters" class="nav-item">👥 Voters</a><a href="/pages/admin/candidates" class="nav-item">👤 Candidates</a><a href="/pages/admin/control" class="nav-item">⚙️ Control</a><a href="/pages/admin/results" class="nav-item active">📈 Results</a>`;
             } else if (role === "candidate") {
               navTitle.innerText = "MFU Voting - Candidate";
-              subMenu.innerHTML = `<a href="/pages/candidate/dashboard" class="nav-item">📊 Dashboard</a><a href="/pages/candidate/manage" class="nav-item">⚙️ Manage Info</a><a href="/pages/candidate/results" class="nav-item active">📈 Election Results</a>`;
+              subMenu.innerHTML = `<a href="/pages/candidate/dashboard" class="nav-item">📊 Dashboard</a><a href="/pages/candidate/info" class="nav-item">📝 Info</a><a href="/pages/candidate/results" class="nav-item active">📈 Election Results</a>`;
             } else {
               navTitle.innerText = "MFU Voting - Voter";
               subMenu.innerHTML = `<a href="/pages/voter/dashboard" class="nav-item">📊 Dashboard</a><a href="/pages/voter/candidates" class="nav-item">👥 Candidates</a><a href="/pages/voter/voting" class="nav-item">🗳️ Vote Now</a><a href="/pages/voter/history" class="nav-item">🕒 History</a><a href="/pages/voter/results" class="nav-item active">📈 Results</a>`;
