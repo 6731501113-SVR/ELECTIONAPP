@@ -97,35 +97,45 @@ app.post('/Candidate/Register', (req, res) => {
 app.post('/Candidate/Login', async (req, res) => {
     const { candidate_id, password } = req.body;
 
+
     try {
-        // 1. ใช้ await แทนการเขียน callback (err, results) => { ... }
-        // หมายเหตุ: [rows] คือการดึงผลลัพธ์ array ออกมาตัวเดียว (Destructuring)
+        // 1. ตรวจสอบว่ากรอกข้อมูลครบถ้วนหรือไม่ ไม่ต้อง ให้ frontend เช็คก้ได้
+        // if (!candidate_id || !password) {
+        //     return res.status(400).json({ status: 'fail', msg: 'กรุณากรอก ID และรหัสผ่าน' });
+        // }
+        // 2. ดึงข้อมูลจาก Database
+        // ใช้ [rows] เพราะ db.js ของคุณใช้ .promise()
         const [rows] = await db.query(
             "SELECT password, is_active FROM candidates WHERE can_id = ?",
             [candidate_id]
         );
-        // 2. ตรวจสอบว่าพบผู้ใช้ไหม
+
+        // 3. กรณีไม่พบผู้ใช้งานในระบบ
         if (rows.length === 0) {
-            return res.status(401).json({ status: 'fail', msg: 'ไม่พบผู้ใช้งาน' });
+            return res.status(401).json({ status: 'fail', msg: 'ไม่พบหมายเลขผู้สมัครนี้' });
         }
         const user = rows[0];
-        // 3. ตรวจสอบสถานะบัญชี
-        if (user.is_active === 0) {
-            return res.status(403).json({ status: 'fail', msg: 'บัญชีถูกปิดใช้งาน' });
-        }
-        // 4. ตรวจสอบรหัสผ่านด้วย Argon2
-        const isMatch = await argon2.verify(user.password, password);
 
+        // 4. ตรวจสอบสถานะบัญช (is_active)
+        if (user.is_active === 0) {
+            return res.status(403).json({ status: 'fail', msg: 'บัญชีนี้ถูกปิดใช้งานชั่วคราว' });
+        }
+
+        // 5. ตรวจสอบรหัสผ่านด้วย Argon2 (Verify)
+        // user.password คือ Hash จาก DB, password คือรหัสที่รับมาจากหน้าเว็บ
+        const isMatch = await argon2.verify(user.password, password);
         if (isMatch) {
-            // ✅ SESSION - ใช้ key 'can_id' ให้ตรงกันทั้งโปรเจกต์
+            // ✅ รหัสถูกต้อง: ทำการเซ็ต SESSION เพื่อยืนยันตัวตน
             req.session.can_id = candidate_id;
             req.session.role = 'candidate';
             req.session.isLoggedIn = true;
 
-
-            // บันทึก Session และตอบกลับ
+            // 6. บันทึก Session ให้เสร็จสิ้นก่อนส่ง Response กลับไป
             req.session.save((err) => {
-                if (err) throw err;
+                if (err) {
+                    console.error("Session Save Error:", err);
+                    return res.status(500).json({ status: 'error', msg: 'ระบบ Session มีปัญหา' });
+                }
                 return res.status(200).json({
                     status: 'success',
                     redirect: 'candidate-dashboard.html',
@@ -133,17 +143,16 @@ app.post('/Candidate/Login', async (req, res) => {
                 });
             });
         } else {
+            // ❌ รหัสผ่านไม่ถูกต้อง
             return res.status(401).json({ status: 'fail', msg: 'รหัสผ่านไม่ถูกต้อง' });
         }
 
-
     } catch (error) {
-        // จัดการ Error ทั้งหมดในที่เดียว (DB Error, Verification Error)
-        console.error("Login Error:", error);
-        return res.status(500).json({ status: 'error', msg: 'Server Error หรือ DB Error' });
+        // จัดการ Error กรณีระบบฐานข้อมูลหรือการเข้ารหัสมีปัญหา
+        console.error("Candidate Login Error Details:", error);
+        return res.status(500).json({ status: 'error', msg: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
     }
 });
-
 
 // --- ส่วนของ Admin Login ---
 app.post('/Admin/Login', (req, res) => {
