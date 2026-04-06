@@ -133,50 +133,59 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        const role = localStorage.getItem("role") || "voter";
         const body = document.getElementById("main-body");
         const subMenu = document.getElementById("sub-menu-bar");
         const navTitle = document.getElementById("nav-title");
         const quickList = document.getElementById("quick-access-list");
 
-        // 1. ตั้งค่าพื้นฐานตาม Role
-        body.className = `role-${role}`;
+        // ดึงข้อมูล role จาก session ผ่าน API
+        fetch('/session/check')
+          .then(res => res.json())
+          .then(data => {
+            const role = data.role || "voter";
+            // 1. ตั้งค่าพื้นฐานตาม Role
+            body.className = `role-${role}`;
 
-        if (role === "admin") {
-          navTitle.innerText = "MFU Voting - Admin";
-          subMenu.innerHTML = `
-            <a href="/pages/admin/dashboard" class="nav-item active">📊 Dashboard</a>
-            <a href="/pages/admin/voters" class="nav-item">👥 Voters</a>
-            <a href="/pages/admin/candidates" class="nav-item">👤 Candidates</a>
-            <a href="/pages/admin/control" class="nav-item">⚙️ Control</a>
-            <a href="/pages/admin/results" class="nav-item">📈 Results</a>`;
-          quickList.innerHTML = `
-            ${createQuickItem("Manage Voters", "Add/Remove and verify voter rights", "/pages/admin/voters", "Go to Voters →")}
-            ${createQuickItem("Manage Candidates", "Manage candidate registration and status", "/pages/admin/candidates", "Go to Candidates →")}`;
-        } 
-        else if (role === "candidate") {
-          navTitle.innerText = "MFU Voting - Candidate";
-          subMenu.innerHTML = `
-            <a href="/pages/candidate/dashboard" class="nav-item active">📊 Dashboard</a>
-            <a href="/pages/candidate/manage" class="nav-item">⚙️ Manage Info</a>
-            <a href="/pages/candidate/results" class="nav-item">📈 Election Results</a>`;
-          
-          quickList.innerHTML = `
-            ${createQuickItem("Candidate Profile", "Update your policies and information", "/pages/candidate/manage", "Manage Info →")}
-            ${createQuickItem("Live Results", "Check the latest ranking status", "/pages/candidate/results", "View Results →")}`;
-        } 
-        else {
-          navTitle.innerText = "MFU Voting - Voter";
-          subMenu.innerHTML = `
-            <a href="/pages/voter/dashboard" class="nav-item active">📊 Dashboard</a>
-            <a href="/pages/voter/candidates" class="nav-item">👥 Candidates</a>
-            <a href="/pages/voter/voting" class="nav-item">🗳️ Vote Now</a>
-            <a href="/pages/voter/history" class="nav-item">🕒 History</a>
-            <a href="/pages/voter/results" class="nav-item">📈 Results</a>`;
-          quickList.innerHTML = `
-            ${createQuickItem("Your Voting Status", "Check if your vote has been recorded", "/pages/voter/history", "View History →")}
-            ${createQuickItem("Cast Your Vote", "Support your preferred candidate now", "/pages/voter/voting", "Vote Now →")}`;
-        }
+            if (role === "admin") {
+              navTitle.innerText = "MFU Voting - Admin";
+              subMenu.innerHTML = `
+                <a href="/pages/admin/dashboard" class="nav-item active">📊 Dashboard</a>
+                <a href="/pages/admin/voters" class="nav-item">👥 Voters</a>
+                <a href="/pages/admin/candidates" class="nav-item">👤 Candidates</a>
+                <a href="/pages/admin/control" class="nav-item">⚙️ Control</a>
+                <a href="/pages/admin/results" class="nav-item">📈 Results</a>`;
+              quickList.innerHTML = `
+                ${createQuickItem("Manage Voters", "Add/Remove and verify voter rights", "/pages/admin/voters", "Go to Voters →")}
+                ${createQuickItem("Manage Candidates", "Manage candidate registration and status", "/pages/admin/candidates", "Go to Candidates →")}`;
+            } 
+            else if (role === "candidate") {
+              navTitle.innerText = "MFU Voting - Candidate";
+              subMenu.innerHTML = `
+                <a href="/pages/candidate/dashboard" class="nav-item active">📊 Dashboard</a>
+                <a href="/pages/candidate/manage" class="nav-item">⚙️ Manage Info</a>
+                <a href="/pages/candidate/results" class="nav-item">📈 Election Results</a>`;
+              
+              quickList.innerHTML = `
+                ${createQuickItem("Candidate Profile", "Update your policies and information", "/pages/candidate/manage", "Manage Info →")}
+                ${createQuickItem("Live Results", "Check the latest ranking status", "/pages/candidate/results", "View Results →")}`;
+            } 
+            else {
+              navTitle.innerText = "MFU Voting - Voter";
+              subMenu.innerHTML = `
+                <a href="/pages/voter/dashboard" class="nav-item active">📊 Dashboard</a>
+                <a href="/pages/voter/candidates" class="nav-item">👥 Candidates</a>
+                <a href="/pages/voter/voting" class="nav-item">🗳️ Vote Now</a>
+                <a href="/pages/voter/history" class="nav-item">🕒 History</a>
+                <a href="/pages/voter/results" class="nav-item">📈 Results</a>`;
+              quickList.innerHTML = `
+                ${createQuickItem("Your Voting Status", "Check if your vote has been recorded", "/pages/voter/history", "View History →")}
+                ${createQuickItem("Cast Your Vote", "Support your preferred candidate now", "/pages/voter/voting", "Vote Now →")}`;
+            }
+          })
+          .catch(err => {
+            console.error("Error fetching session:", err);
+            window.location.href = "/";
+          });
 
         fetch("/dashboard")
           .then((res) => res.json())
@@ -200,7 +209,14 @@
           </div>`;
       }
 
-      function logout() { localStorage.clear(); window.location.href = "/"; }
+      function logout() {
+        fetch('/logout', { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+            window.location.href = "/";
+          })
+          .catch(err => console.error("Logout error:", err));
+      }
     </script>
   </body>
 </html>

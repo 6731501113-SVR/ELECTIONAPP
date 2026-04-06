@@ -34,11 +34,12 @@ db.getConnection((err, connection) => {
 // ======================================== LOGIN & REGISTER ========================================
 
 // --- ส่วนของ Voter Login ---
-app.post('/Voter/Login', (req, res) => {
-    const { citizen_id, laser_id } = req.body;
-    const sql = "SELECT citizen_id, laser_id, is_active FROM voters WHERE citizen_id = ? AND laser_id = ?";
-    db.query(sql, [citizen_id, laser_id], (err, results) => {
-        if (err) return res.status(500).json({ status: 'error', msg: 'DB Error' });
+app.post('/Voter/Login', async (req, res) => {
+    try {
+        const { citizen_id, laser_id } = req.body;
+        const sql = "SELECT citizen_id, laser_id, is_active FROM voters WHERE citizen_id = ? AND laser_id = ?";
+        
+        const [results] = await db.query(sql, [citizen_id, laser_id]);
 
         if (results.length === 0) {
             return res.status(401).json({ status: 'fail', msg: 'ข้อมูลไม่ถูกต้อง' });
@@ -51,32 +52,36 @@ app.post('/Voter/Login', (req, res) => {
         req.session.citizen_id = citizen_id;
         req.session.role = 'voter';
         req.session.isLoggedIn = true;
-        res.status(200).json({
-            status: 'success',
-            redirect: '/pages/voter/dashboard',
-            msg: 'เข้าสู่ระบบสำเร็จ',
+        req.session.save((err) => {
+            if (err) {
+                console.error("Session Save Error:", err);
+                return res.status(500).json({ status: 'error', msg: 'ระบบ Session มีปัญหา' });
+            }
+            res.status(200).json({
+                status: 'success',
+                redirect: '/pages/voter/dashboard',
+                msg: 'เข้าสู่ระบบสำเร็จ',
+            });
         });
-    });
+    } catch (error) {
+        console.error('Voter Login Error:', error.message);
+        res.status(500).json({ status: 'error', msg: 'DB Error: ' + error.message });
+    }
 });
 
 
 // --- ส่วนของ Candidate Register ---
-app.post('/Candidate/Register', (req, res) => {
-    const { candidate_id, password } = req.body;
+app.post('/Candidate/Register', async (req, res) => {
+    try {
+        const { candidate_id, password } = req.body;
+        const passwordHash = await argon2.hash(password);
 
-    const sql = `
-        UPDATE candidates 
-        SET password = ? 
-        WHERE can_id = ? AND password IS NULL
-    `;
-    passwordHash = argon2.hash(password);
-    db.query(sql, [passwordHash, candidate_id], (err, result) => {
-        if (err) {
-            return res.status(500).json({
-                status: 'error',
-                msg: 'เกิดข้อผิดพลาด'
-            });
-        }
+        const sql = `
+            UPDATE candidates 
+            SET password = ? 
+            WHERE can_id = ? AND password IS NULL
+        `;
+        const [result] = await db.query(sql, [passwordHash, candidate_id]);
 
         if (result.affectedRows === 0) {
             return res.status(401).json({
@@ -89,7 +94,13 @@ app.post('/Candidate/Register', (req, res) => {
             status: 'success',
             msg: 'ลงทะเบียนสำเร็จ'
         });
-    });
+    } catch (error) {
+        console.error('Candidate Register Error:', error.message);
+        res.status(500).json({
+            status: 'error',
+            msg: 'เกิดข้อผิดพลาด: ' + error.message
+        });
+    }
 });
 
 
@@ -155,19 +166,29 @@ app.post('/Candidate/Login', async (req, res) => {
 });
 
 // --- ส่วนของ Admin Login ---
-app.post('/Admin/Login', (req, res) => {
-    const { username, password } = req.body;
-    const sql = "SELECT * FROM admin WHERE username = ? AND password = ?";
-    db.query(sql, [username, password], (err, results) => {
-        if (err) return res.status(500).json({ status: 'error', msg: 'DB Error' });
+app.post('/Admin/Login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const sql = "SELECT * FROM admin WHERE username = ? AND password = ?";
+        const [results] = await db.query(sql, [username, password]);
+        
         if (results.length > 0) {
             req.session.role = 'admin';
             req.session.isLoggedIn = true;
-            res.status(200).json({ status: 'success', redirect: '/pages/admin/dashboard', msg: 'Admin Login Success' });
+            req.session.save((err) => {
+                if (err) {
+                    console.error("Session Save Error:", err);
+                    return res.status(500).json({ status: 'error', msg: 'ระบบ Session มีปัญหา' });
+                }
+                res.status(200).json({ status: 'success', redirect: '/pages/admin/dashboard', msg: 'Admin Login Success' });
+            });
         } else {
             res.status(401).json({ status: 'fail', msg: 'Admin Username/Password ผิด' });
         }
-    });
+    } catch (error) {
+        console.error('Admin Login Error:', error.message);
+        res.status(500).json({ status: 'error', msg: 'DB Error: ' + error.message });
+    }
 });
 
 
@@ -253,26 +274,30 @@ app.get('/results', async (req, res) => {
 // ======================================== VOTER ========================================
 
 // 1. ดึงรายชื่อผู้สมัคร
-app.get('/Voter/candidates', (req, res) => {
-    const sql = "SELECT can_id, name, policy FROM candidates";
-    db.query(sql, (err, results) => {
-        if (err) return res.status(500).send('Server error');
+app.get('/Voter/candidates', async (req, res) => {
+    try {
+        const sql = "SELECT can_id, name, policy FROM candidates";
+        const [results] = await db.query(sql);
         res.status(200).json(results);
-    });
+    } catch (error) {
+        console.error('Voter Candidates Error:', error.message);
+        res.status(500).send('Server error: ' + error.message);
+    }
 });
 
 // 2. บันทึกโหวต 
-app.post('/Voter/vote', (req, res) => {
-    const { citizen_id, can_id } = req.body;
+app.post('/Voter/vote', async (req, res) => {
+    try {
+        const { citizen_id, can_id } = req.body;
 
-    if (!can_id || !citizen_id) {
-        return res.status(401).send('Candidate ID and Citizen ID are required');
-    }
+        if (!can_id || !citizen_id) {
+            return res.status(401).send('Candidate ID and Citizen ID are required');
+        }
 
-    // 1) ตรวจ voter ทะเบียนอยู่, ยังไม่โหวต, active
-    const checkVoterSql = "SELECT has_voted, is_active FROM voters WHERE citizen_id = ?";
-    db.query(checkVoterSql, [citizen_id], (err, voterResult) => {
-        if (err) return res.status(500).send('Server error');
+        // 1) ตรวจ voter ทะเบียนอยู่, ยังไม่โหวต, active
+        const checkVoterSql = "SELECT has_voted, is_active FROM voters WHERE citizen_id = ?";
+        const [voterResult] = await db.query(checkVoterSql, [citizen_id]);
+        
         if (voterResult.length === 0) return res.status(404).send('Voter not found');
         const voter = voterResult[0];
         if (voter.is_active === 0) return res.status(403).send('บัญชีผู้ใช้ถูกปิดใช้งาน');
@@ -280,59 +305,60 @@ app.post('/Voter/vote', (req, res) => {
 
         // 2) ตรวจ candidate active
         const checkCandidateSql = "SELECT is_active FROM candidates WHERE can_id = ?";
-        db.query(checkCandidateSql, [can_id], (err, candidateResult) => {
-            if (err) return res.status(500).send('Server error');
-            if (candidateResult.length === 0) return res.status(404).send('Candidate not found');
-            if (candidateResult[0].is_active === 0) return res.status(403).send('ผู้สมัครถูกปิดใช้งาน');
+        const [candidateResult] = await db.query(checkCandidateSql, [can_id]);
+        
+        if (candidateResult.length === 0) return res.status(404).send('Candidate not found');
+        if (candidateResult[0].is_active === 0) return res.status(403).send('ผู้สมัครถูกปิดใช้งาน');
 
-            // 3) เช็คระบบเปิดโหวต
-            const checkSystemSql = "SELECT is_open FROM admin LIMIT 1";
-            db.query(checkSystemSql, (err, adminResult) => {
-                if (err) return res.status(500).send('Server error');
-                if (adminResult.length === 0 || adminResult[0].is_open === 0) {
-                    return res.status(403).send('ระบบปิดโหวตแล้ว (Voting is closed)');
-                }
+        // 3) เช็คระบบเปิดโหวต
+        const checkSystemSql = "SELECT is_open FROM admin LIMIT 1";
+        const [adminResult] = await db.query(checkSystemSql);
+        
+        if (adminResult.length === 0 || adminResult[0].is_open === 0) {
+            return res.status(403).send('ระบบปิดโหวตแล้ว (Voting is closed)');
+        }
 
-                // 4) บันทึกโหวต
-                const insertVoteSql = "INSERT INTO votes (citizen_id, can_id) VALUES (?, ?)";
-                db.query(insertVoteSql, [citizen_id, can_id], (err, result) => {
-                    if (err) return res.status(400).send('Already voted or Server error');
+        // 4) บันทึกโหวต
+        const insertVoteSql = "INSERT INTO votes (citizen_id, can_id) VALUES (?, ?)";
+        await db.query(insertVoteSql, [citizen_id, can_id]);
 
-                    const updateScoreSql = "UPDATE candidates SET vote_score = vote_score + 1 WHERE can_id = ?";
-                    db.query(updateScoreSql, [can_id], (err, updateResult) => {
-                        if (err) return res.status(500).send('Server error');
+        // 5) อัพเดต score
+        const updateScoreSql = "UPDATE candidates SET vote_score = vote_score + 1 WHERE can_id = ?";
+        await db.query(updateScoreSql, [can_id]);
 
-                        // Update voter has_voted
-                        const updateVoterSql = "UPDATE voters SET has_voted = 1 WHERE citizen_id = ?";
-                        db.query(updateVoterSql, [citizen_id], (err, updateVoterResult) => {
-                            if (err) return res.status(500).send('Server error');
-                            console.log(`✅ Vote saved! Citizen ${citizen_id} voted for ${can_id}`);
-                            res.status(200).send('Vote submitted successfully');
-                        });
-                    });
-                });
-            });
-        });
-    });
+        // 6) อัพเดต voter has_voted
+        const updateVoterSql = "UPDATE voters SET has_voted = 1 WHERE citizen_id = ?";
+        await db.query(updateVoterSql, [citizen_id]);
+        
+        console.log(`✅ Vote saved! Citizen ${citizen_id} voted for ${can_id}`);
+        res.status(200).send('Vote submitted successfully');
+    } catch (error) {
+        console.error('Voter Vote Error:', error.message);
+        res.status(500).send('Server error: ' + error.message);
+    }
 });
 
 // 3. ดูประวัติการโหวต
-app.get('/Voter/history/:citizen_id', (req, res) => {
-    const citizenId = req.params.citizen_id;
-    const sql = `
-        SELECT v.vote_timestamp, c.name AS candidate_name, c.can_id
-        FROM votes v
-        JOIN candidates c ON v.can_id = c.can_id
-        WHERE v.citizen_id = ?
-    `;
-    db.query(sql, [citizenId], (err, results) => {
-        if (err) return res.status(500).send('Server error');
+app.get('/Voter/history/:citizen_id', async (req, res) => {
+    try {
+        const citizenId = req.params.citizen_id;
+        const sql = `
+            SELECT v.vote_timestamp, c.name AS candidate_name, c.can_id
+            FROM votes v
+            JOIN candidates c ON v.can_id = c.can_id
+            WHERE v.citizen_id = ?
+        `;
+        const [results] = await db.query(sql, [citizenId]);
+        
         if (results.length > 0) {
             res.status(200).json({ hasVoted: true, data: results });
         } else {
             res.status(200).json({ hasVoted: false, data: [] });
         }
-    });
+    } catch (error) {
+        console.error('Voter History Error:', error.message);
+        res.status(500).send('Server error: ' + error.message);
+    }
 });
 
 // ======================================== CANDIDATE ========================================
@@ -555,75 +581,71 @@ res.status(500).json({ error: 'Server error', message: err.message });
 // ======================================== ADMIN ========================================
 
 // GET /admin/voters - List all voters
-app.get('/admin/voters', (req, res) => {
-    const sql = "SELECT citizen_id, laser_id, name, has_voted, is_active FROM voters";
-    db.query(sql, (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
-        }
+app.get('/admin/voters', async (req, res) => {
+    try {
+        const sql = "SELECT citizen_id, laser_id, name, has_voted, is_active FROM voters";
+        const [results] = await db.query(sql);
         return res.status(200).json({ success: true, data: results });
-        // .sendFile(path.join(__dirname, "public/HTML/admin-voters.html"))
-    });
+    } catch (error) {
+        console.error('Admin Get Voters Error:', error.message);
+        return res.status(500).json({ error: 'Server error', message: error.message });
+    }
 });
 
 // POST /admin/voters - Add new voter
-app.post('/admin/voters', (req, res) => {
-    const { citizen_id, laser_id, name, } = req.body;
-    // if (!citizen_id || !laser_id || !name) {
-    //     return res.status(401).json({ error: 'Bad Request', message: 'citizen_id, laser_id, name are required' });
-    // }
-    const insertSql = "INSERT INTO voters (citizen_id, laser_id, name, has_voted, is_active) VALUES (?, ?, ?, ?, ?)";
-    db.query(insertSql, [citizen_id, laser_id, name, 0, 1], (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
-        }
+app.post('/admin/voters', async (req, res) => {
+    try {
+        const { citizen_id, laser_id, name } = req.body;
+        const insertSql = "INSERT INTO voters (citizen_id, laser_id, name, has_voted, is_active) VALUES (?, ?, ?, ?, ?)";
+        await db.query(insertSql, [citizen_id, laser_id, name, 0, 1]);
         return res.status(200).json({ success: true, message: 'Voter added successfully' });
-    });
+    } catch (error) {
+        console.error('Admin Add Voter Error:', error.message);
+        return res.status(500).json({ error: 'Server error', message: error.message });
+    }
 });
 
 // GET /admin/candidates - List all candidates
-app.get('/admin/candidates', (req, res) => {
-    const sql = "SELECT can_id, name, personal_info, policy, vote_score, is_active FROM candidates";
-    db.query(sql, (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
-        }
+app.get('/admin/candidates', async (req, res) => {
+    try {
+        const sql = "SELECT can_id, name, personal_info, policy, vote_score, is_active FROM candidates";
+        const [results] = await db.query(sql);
         return res.status(200).json({ success: true, data: results });
-    });
+    } catch (error) {
+        console.error('Admin Get Candidates Error:', error.message);
+        return res.status(500).json({ error: 'Server error', message: error.message });
+    }
 });
 
 // POST /admin/candidates - Add new candidate
-app.post('/admin/candidates', (req, res) => {
-    const sqlLast = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
-    db.query(sqlLast, (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
+app.post('/admin/candidates', async (req, res) => {
+    try {
+        const sqlLast = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
+        const [result] = await db.query(sqlLast);
+        
         let nextId = "C001";
         if (result.length > 0) {
             const lastId = result[0].can_id;
             const num = parseInt(lastId.substring(1)) + 1;
             nextId = "C" + num.toString().padStart(3, "0");
         }
+        
         const insertSql = "INSERT INTO candidates (can_id) VALUES (?)";
-        db.query(insertSql, [nextId], (err2) => {
-            if (err2) {
-                return res.status(500).json({ error: err2.message });
-            }
-            res.status(200).json({
-                can_id: nextId
-            });
-        });
-    });
+        await db.query(insertSql, [nextId]);
+        
+        res.status(200).json({ can_id: nextId });
+    } catch (error) {
+        console.error('Admin Add Candidate Error:', error.message);
+        return res.status(500).json({ error: error.message });
+    }
 });
 
 // GET next candidate ID
-app.get("/admin/candidates/next-id", (req, res) => {
-    const sql = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
-    db.query(sql, (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
+app.get("/admin/candidates/next-id", async (req, res) => {
+    try {
+        const sql = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
+        const [result] = await db.query(sql);
+        
         let nextId = "C001";
         if (result.length > 0) {
             const lastId = result[0].can_id;
@@ -631,75 +653,114 @@ app.get("/admin/candidates/next-id", (req, res) => {
             nextId = "C" + num.toString().padStart(3, "0");
         }
         res.status(200).json({ can_id: nextId });
-    });
+    } catch (error) {
+        console.error('Get Next ID Error:', error.message);
+        return res.status(500).json({ error: error.message });
+    }
 });
 
 // PUT /admin/candidates/:can_id - Enable/disable candidate
-app.put('/admin/candidates/:can_id', (req, res) => {
-    const can_id = req.params.can_id;
-    const { is_active } = req.body;
+app.put('/admin/candidates/:can_id', async (req, res) => {
+    try {
+        const can_id = req.params.can_id;
+        const { is_active } = req.body;
 
-    if (is_active === undefined) {
-        return res.status(401).json({ error: 'Bad Request', message: 'is_active is required' });
-    }
-
-    const sql = "UPDATE candidates SET is_active = ? WHERE can_id = ?";
-    db.query(sql, [is_active, can_id], (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
+        if (is_active === undefined) {
+            return res.status(401).json({ error: 'Bad Request', message: 'is_active is required' });
         }
+
+        const sql = "UPDATE candidates SET is_active = ? WHERE can_id = ?";
+        const [result] = await db.query(sql, [is_active, can_id]);
+        
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
         }
         return res.status(200).json({ success: true, message: 'Candidate enabled/disabled successfully' });
-    });
+    } catch (error) {
+        console.error('Update Candidate Status Error:', error.message);
+        return res.status(500).json({ error: 'Server error', message: error.message });
+    }
 });
 
 // PUT /admin/voters/:citizen_id - Enable/disable voter
-app.put('/admin/voters/:citizen_id', (req, res) => {
-    const citizen_id = req.params.citizen_id;
-    const { is_active } = req.body;
+app.put('/admin/voters/:citizen_id', async (req, res) => {
+    try {
+        const citizen_id = req.params.citizen_id;
+        const { is_active } = req.body;
 
-    if (is_active === undefined) {
-        return res.status(401).json({ error: 'Bad Request', message: 'is_active is required' });
-    }
-
-    const sql = "UPDATE voters SET is_active = ? WHERE citizen_id = ?";
-    db.query(sql, [is_active, citizen_id], (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
+        if (is_active === undefined) {
+            return res.status(401).json({ error: 'Bad Request', message: 'is_active is required' });
         }
+
+        const sql = "UPDATE voters SET is_active = ? WHERE citizen_id = ?";
+        const [result] = await db.query(sql, [is_active, citizen_id]);
+        
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Not Found', message: 'Voter not found' });
         }
         return res.status(200).json({ success: true, message: 'Voter enabled/disabled successfully' });
-    });
+    } catch (error) {
+        console.error('Update Voter Status Error:', error.message);
+        return res.status(500).json({ error: 'Server error', message: error.message });
+    }
 });
 
 // GET /admin/control - Get voting status
-app.get('/admin/control', (req, res) => {
-    const sql = "SELECT is_open FROM admin LIMIT 1";
-    db.query(sql, (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
-        }
+app.get('/admin/control', async (req, res) => {
+    try {
+        const sql = "SELECT is_open FROM admin LIMIT 1";
+        const [results] = await db.query(sql);
         const is_open = results.length > 0 ? results[0].is_open : 0;
         return res.status(200).json({ success: true, is_open: is_open });
-    });
+    } catch (error) {
+        console.error('Get Control Status Error:', error.message);
+        return res.status(500).json({ error: 'Server error', message: error.message });
+    }
 });
 
 // PUT /admin/control - Set voting status
-app.put('/admin/control', (req, res) => {
-    const { is_open } = req.body;
-    if (is_open === undefined) {
-        return res.status(401).json({ error: 'Bad Request', message: 'is_open is required' });
-    }
-    const sql = "UPDATE admin SET is_open = ?";
-    db.query(sql, [is_open], (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
+app.put('/admin/control', async (req, res) => {
+    try {
+        const { is_open } = req.body;
+        if (is_open === undefined) {
+            return res.status(401).json({ error: 'Bad Request', message: 'is_open is required' });
         }
+        const sql = "UPDATE admin SET is_open = ?";
+        await db.query(sql, [is_open]);
         return res.status(200).json({ success: true, message: 'Voting status updated successfully' });
+    } catch (error) {
+        console.error('Update Control Status Error:', error.message);
+        return res.status(500).json({ error: 'Server error', message: error.message });
+    }
+});
+
+// ======================================== SESSION MANAGEMENT ========================================
+
+// GET /session/check - ตรวจสอบ session
+app.get('/session/check', (req, res) => {
+    if (req.session.isLoggedIn) {
+        res.status(200).json({
+            isLoggedIn: true,
+            role: req.session.role,
+            citizen_id: req.session.citizen_id,
+            can_id: req.session.can_id
+        });
+    } else {
+        res.status(401).json({
+            isLoggedIn: false,
+            message: 'Not logged in'
+        });
+    }
+});
+
+// POST /logout - ล้าง session
+app.post('/logout', async (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Logout Error:', err);
+            return res.status(500).json({ status: 'error', msg: 'เกิดข้อผิดพลาดในการ logout' });
+        }
+        res.status(200).json({ status: 'success', msg: 'Logout สำเร็จ' });
     });
 });
 

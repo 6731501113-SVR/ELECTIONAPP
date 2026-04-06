@@ -194,40 +194,40 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // ดึง ID จาก localStorage ที่เก็บไว้ตอน Login
-      const can_id =
-        localStorage.getItem("can_id") ||
-        localStorage.getItem("candidate_id");
-
-      // ตรวจสอบว่ามี ID หรือไม่ ถ้าไม่มีให้กลับไปหน้า Login
-      if (!can_id) {
-        alert("Session expired, please login again.");
-        window.location.href = "candidate-login.html";
-        return;
-      }
-
-      // ปรับ Fetch ให้ส่ง can_id ไปใน URL ด้วยเพื่อเป็นแผนสำรอง (Hybrid Method)
-      fetch(`/candidate/profile?can_id=${can_id}`, {
-        method: "GET",
-        // ยังคง credentials ไว้เพื่อให้ระบบ Session ทำงานควบคู่ไปด้วย
-        credentials: "include",
-      })
-        .then((response) => {
-          // จัดการกรณีสำเร็จ (200) และผิดพลาด (500) ตามที่อาจารย์กำหนด
-          if (response.status === 200) {
-            return response.json();
-          } else {
-            // หาก Server ตอบกลับมาไม่ใช่ 200 (เช่น 401 หรือ 500)
-            throw new Error("Server Error or Unauthorized");
+      // ดึง ID จาก Session API แทน localStorage
+      fetch('/session/check')
+        .then(res => res.json())
+        .then(data => {
+          if (!data.isLoggedIn || !data.can_id) {
+            alert("Session expired, please login again.");
+            window.location.href = "/pages/candidate/login";
+            return;
           }
-        })
-        .then((result) => {
-          // นำข้อมูลมาแสดงผลในหน้า UI
-          if (result && result.can_id) {
-            document.getElementById("display-can-id").innerText =
-              result.can_id;
-            document.getElementById("display-name").innerText = result.name;
-            document.getElementById("display-policy").innerText =
+
+          const can_id = data.can_id;
+
+          // ปรับ Fetch ให้ส่ง can_id ไปใน URL ด้วยเพื่อเป็นแผนสำรอง (Hybrid Method)
+          fetch(`/candidate/profile?can_id=${can_id}`, {
+            method: "GET",
+            // ยังคง credentials ไว้เพื่อให้ระบบ Session ทำงานควบคู่ไปด้วย
+            credentials: "include",
+          })
+            .then((response) => {
+              // จัดการกรณีสำเร็จ (200) และผิดพลาด (500) ตามที่อาจารย์กำหนด
+              if (response.status === 200) {
+                return response.json();
+              } else {
+                // หาก Server ตอบกลับมาไม่ใช่ 200 (เช่น 401 หรือ 500)
+                throw new Error("Server Error or Unauthorized");
+              }
+            })
+            .then((result) => {
+              // นำข้อมูลมาแสดงผลในหน้า UI
+              if (result && result.can_id) {
+                document.getElementById("display-can-id").innerText =
+                  result.can_id;
+                document.getElementById("display-name").innerText = result.name;
+                document.getElementById("display-policy").innerText =
               result.policy;
           }
         })
