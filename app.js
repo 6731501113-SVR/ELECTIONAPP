@@ -356,58 +356,153 @@ app.get('/candidate/profile', async (req, res) => {
     }
 });
 
-// บันทึกการแก้ไข name, personal_info, policy (ปุ่ม Save Changes)
-app.put('/candidate/me', async (req, res) => {
-    // รับค่าจาก body
-    const { can_id, name, policy } = req.body;
+// // บันทึกการแก้ไข name, personal_info, policy (ปุ่ม Save Changes)
+// app.put('/candidate/me', async (req, res) => {
+//     // รับค่าจาก body
+//     const { can_id, name, policy } = req.body;
 
+//     try {
+//         // เตรียมคำสั่ง SQL สำหรับการอัปเดตข้อมูล
+//         const sql = "UPDATE candidates SET name = ?, policy = ? WHERE can_id = ?";
+
+//         // รันคำสั่ง SQL ผ่าน Database Pool
+//         await db.query(sql, [name, policy, can_id]);
+
+//         // กรณีสำเร็จ (Case 200): ส่งข้อความแจ้งเตือนกลับไป
+//         res.status(200).json({
+//             message: 'Profile updated successfully'
+//         });
+
+//     } catch (err) {
+//         // กรณีเกิดข้อผิดพลาด (Case 500): เช่น Database หลุด หรือ SQL ผิดพลาด
+//         console.error('Update Error:', err);
+//         res.status(500).json({
+//             error: 'DB Error',
+//             message: err.message
+//         });
+//     }
+// });
+
+// app.get('/Candidate/me', (req, res) => {
+//     const can_id = req.query.can_id || req.body?.can_id;
+//     if (!can_id) {
+//         return res.status(401).json({ error: 'Bad Request', message: 'can_id is required (query or body)' });
+//     }
+
+//     const sql = `SELECT can_id, name, personal_info, policy, vote_score, is_active FROM candidates WHERE can_id = ?`;
+//     db.query(sql, [can_id], (err, results) => {
+//         if (err) {
+//             return res.status(500).json({ error: 'Server error', message: err.message });
+//         }
+//         if (results.length === 0) {
+//             return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
+//         }
+//         const candidate = results[0];
+//         return res.status(200).json({
+//             can_id: candidate.can_id,
+//             name: candidate.name,
+//             personal_info: candidate.personal_info,
+//             policy: candidate.policy,
+//             vote_score: candidate.vote_score,
+//             is_active: candidate.is_active
+//         });
+//     });
+// });
+
+// GET /candidate/info?can_id=C001
+// ดึงข้อมูลมาแสดงในฟอร์มหน้า Manage Info
+// ใช้ can_id จาก query param (เหมือนที่เพื่อนใช้ใน /candidate/profile)
+app.get('/candidate/info', async (req, res) => {
     try {
-        // เตรียมคำสั่ง SQL สำหรับการอัปเดตข้อมูล
-        const sql = "UPDATE candidates SET name = ?, policy = ? WHERE can_id = ?";
+        const can_id = req.query.can_id;
 
-        // รันคำสั่ง SQL ผ่าน Database Pool
-        await db.query(sql, [name, policy, can_id]);
+        
+if (!can_id) {
+  return res.status(400).json({ error: 'Validation Error', message: 'can_id is required' });
+}
 
-        // กรณีสำเร็จ (Case 200): ส่งข้อความแจ้งเตือนกลับไป
-        res.status(200).json({
-            message: 'Profile updated successfully'
-        });
+const [rows] = await db.query(
+  "SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?",
+  [can_id]
+);
+
+if (rows.length === 0) {
+  return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
+}
+
+res.json(rows[0]);
+
 
     } catch (err) {
-        // กรณีเกิดข้อผิดพลาด (Case 500): เช่น Database หลุด หรือ SQL ผิดพลาด
-        console.error('Update Error:', err);
-        res.status(500).json({
-            error: 'DB Error',
-            message: err.message
-        });
+        console.error('Get Candidate Info Error:', err);
+        res.status(500).json({ error: 'Server error', message: err.message });
     }
 });
 
-app.get('/Candidate/me', (req, res) => {
-    const can_id = req.query.can_id || req.body?.can_id;
-    if (!can_id) {
-        return res.status(401).json({ error: 'Bad Request', message: 'can_id is required (query or body)' });
-    }
+// PUT /candidate/info
+// บันทึกข้อมูลเมื่อกด Save Changes
+// Body: { can_id, name, personal_info, policy }
+app.put('/candidate/info', async (req, res) => {
+    try {
+        const { can_id, name, personal_info, policy } = req.body;
 
-    const sql = `SELECT can_id, name, personal_info, policy, vote_score, is_active FROM candidates WHERE can_id = ?`;
-    db.query(sql, [can_id], (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: 'Server error', message: err.message });
+        if (!can_id) {
+            return res.status(400).json({ error: 'Validation Error', message: 'can_id is required' });
         }
-        if (results.length === 0) {
-            return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
+
+        if (!name && !personal_info && !policy) {
+            return res.status(400).json({
+                error: 'Validation Error',
+                message: 'Please provide at least one field to update'
+            });
         }
-        const candidate = results[0];
-        return res.status(200).json({
-            can_id: candidate.can_id,
-            name: candidate.name,
-            personal_info: candidate.personal_info,
-            policy: candidate.policy,
-            vote_score: candidate.vote_score,
-            is_active: candidate.is_active
+
+        if (name !== undefined && name.trim() === '') {
+            return res.status(400).json({ error: 'Validation Error', message: 'name must not be empty' });
+        }
+
+        // Build query เฉพาะ field ที่ส่งมา
+        const fields = [];
+        const values = [];
+
+        if (name !== undefined) {
+            fields.push('name = ?');
+            values.push(name.trim());
+        }
+        if (personal_info !== undefined) {
+            fields.push('personal_info = ?');
+            values.push(personal_info);
+        }
+        if (policy !== undefined) {
+            fields.push('policy = ?');
+            values.push(policy);
+        }
+
+        values.push(can_id);
+
+        await db.query(
+            `UPDATE candidates SET ${fields.join(', ')} WHERE can_id = ?`,
+            values
+        );
+
+        // ดึงข้อมูลล่าสุดกลับมาส่ง response
+        const [updated] = await db.query(
+            "SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?",
+            [can_id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: updated[0]
         });
-    });
+
+} catch (err) {
+console.error('Update Candidate Info Error:', err);
+res.status(500).json({ error: 'Server error', message: err.message });
+}
 });
+
 
 // // บันทึกการแก้ไข name, personal_info, policy (ปุ่ม Save Changes)
 // app.put('/Candidate/me', (req, res) => {
@@ -441,7 +536,7 @@ app.get('/Candidate/me', (req, res) => {
 //     }
 
 //     values.push(can_id);
-//     const sql = `UPDATE candidates SET ${fields.join(', ')} WHERE can_id = ?`;
+//     const sql = `UPDATE candidates SET ${ fields.join(', ') } WHERE can_id = ? `;
 
 //     db.query(sql, values, (err) => {
 //         if (err) {
