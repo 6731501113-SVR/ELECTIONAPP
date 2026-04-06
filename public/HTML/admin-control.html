@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Control - Admin Portal</title>
-    <link rel="stylesheet" href="../CSS/style.css">
+    <link rel="stylesheet" href="/CSS/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; }
@@ -16,15 +16,15 @@
 
     <nav class="navbar admin" style="background-color: #9333ea; color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; height: 70px; z-index: 1000; box-sizing: border-box;">
         <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; white-space: nowrap;">MFU Voting - Admin</h2>
-        <a href="index.html" class="btn" style="background: white; color: #9333ea; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; flex-shrink: 0;">Logout</a>
+        <a href="/" class="btn" style="background: white; color: #9333ea; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; flex-shrink: 0;">Logout</a>
     </nav>
 
     <div class="nav-links" style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 70px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
-        <a href="admin-dashboard.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📊 Dashboard</a>
-        <a href="admin-voters.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">👥 Voters</a>
-        <a href="admin-candidates.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">👤 Candidates</a>
-        <a href="admin-control.html" style="text-decoration: none; color: #9333ea; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid #9333ea; font-weight: 600;">⚙️ Control</a>
-        <a href="admin-results.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📈 Results</a>
+        <a href="/pages/admin/dashboard" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📊 Dashboard</a>
+        <a href="/pages/admin/voters" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">👥 Voters</a>
+        <a href="/pages/admin/candidates" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">👤 Candidates</a>
+        <a href="/pages/admin/control" style="text-decoration: none; color: #9333ea; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid #9333ea; font-weight: 600;">⚙️ Control</a>
+        <a href="/pages/admin/results" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📈 Results</a>
     </div>
 
     <div class="container" style="margin-top: 170px; max-width: 900px; margin-left: auto; margin-right: auto; padding: 20px;">

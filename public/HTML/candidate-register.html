@@ -65,7 +65,7 @@
             </div>
             <button type="submit">Register Account</button>
         </form>
-        <p style="text-align: center; margin-top: 15px;"><a href="candidate-login.html" style="color: #16a34a;">Back to
+        <p style="text-align: center; margin-top: 15px;"><a href="/pages/candidate/login" style="color: #16a34a;">Back to
                 Login</a></p>
     </div>
 
@@ -85,7 +85,7 @@
 
             const data = await response.json();
             alert(data.msg);
-            if (response.ok) window.location.href = 'candidate-login.html';
+            if (response.ok) window.location.href = '/pages/candidate/login';
         });
     </script>
 </body>

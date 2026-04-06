@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cast Your Vote - MFU Election</title>
-    <link rel="stylesheet" href="../CSS/style.css">
+    <link rel="stylesheet" href="/CSS/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -56,26 +56,26 @@
     <nav class="navbar voter"
         style="background-color: #2563eb; color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box;">
         <h2 style="margin: 0;">MFU Voting - Voter</h2>
-        <a href="index.html" class="btn"
+        <a href="/" class="btn"
             style="background: white; color: #2563eb; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
     </nav>
 
 
     <div class="nav-links"
         style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 65px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
-        <a href="voter-dashboard.html"
+        <a href="/pages/voter/dashboard"
             style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📊
             Dashboard</a>
-        <a href="voter-candidates.html"
+        <a href="/pages/voter/candidates"
             style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">👥
             Candidates</a>
-        <a href="voter-voting.html"
+        <a href="/pages/voter/voting"
             style="text-decoration: none; color: #2563eb; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid #2563eb; font-weight: 600;">🗳️
             Vote Now</a>
-        <a href="voter-history.html"
+        <a href="/pages/voter/history"
             style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">🕒
             History</a>
-        <a href="voter-results.html"
+        <a href="/pages/voter/results"
             style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📈
             Results</a>
     </div>
@@ -199,7 +199,7 @@
                         if (response.ok) {
                             alert('✅ Your vote has been successfully submitted!');
 
-                            window.location.href = 'voter-results.html';
+                            window.location.href = '/pages/voter/results';
                         } else {
                             alert('❌ Failed to submit vote.');
                         }

@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Profile - Candidate</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/CSS/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body style="display: block; background: #f8fafc; font-family: 'Inter', sans-serif;">
 
     <nav class="navbar candidate" style="background-color: #16a34a; color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box;">
         <h2 style="margin: 0;">MFU Voting - Candidate</h2>
-        <a href="index.html" class="btn" style="background: white; color: #16a34a; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
+        <a href="/" class="btn" style="background: white; color: #16a34a; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
     </nav>
 
     <div class="nav-links" style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 65px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
-        <a href="dashboard.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📊 Dashboard</a>
-        <a href="candidate-info.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📝 Info</a>
-        <a href="results.html" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📈 Election Results</a>
+        <a href="/pages/candidate/dashboard" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📊 Dashboard</a>
+        <a href="/pages/candidate/info" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📝 Info</a>
+        <a href="/pages/candidate/results" style="text-decoration: none; color: #64748b; display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 5px; border-bottom: 3px solid transparent; font-weight: 600;">📈 Election Results</a>
     </div>
 
     <div class="container" style="margin-top: 160px; max-width: 900px; margin-left: auto; margin-right: auto; padding: 20px;">
@@ -53,7 +53,7 @@
                 <div id="msg" style="display:none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 600;"></div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px;">
-                    <a href="candidate-info.html" class="btn" style="background-color: #e2e8f0; color: #475569; padding: 12px 40px; font-size: 1rem; font-weight: bold; border-radius: 8px; text-decoration: none; display: inline-block;">
+                    <a href="/pages/candidate/info" class="btn" style="background-color: #e2e8f0; color: #475569; padding: 12px 40px; font-size: 1rem; font-weight: bold; border-radius: 8px; text-decoration: none; display: inline-block;">
                         Cancel
                     </a>
                     <button
@@ -127,7 +127,7 @@
                 if (res.ok) {
                     showMsg('✅ Saved successfully!', true);
                     setTimeout(() => {
-                        window.location.href = 'candidate-info.html';
+                        window.location.href = '/pages/candidate/info';
                     }, 1000);
                 } else {
                     showMsg(`❌ ${data.message}`, false);

@@ -53,7 +53,7 @@ app.post('/Voter/Login', (req, res) => {
         req.session.isLoggedIn = true;
         res.status(200).json({
             status: 'success',
-            redirect: 'voter-dashboard.html',
+            redirect: '/pages/voter/dashboard',
             msg: 'เข้าสู่ระบบสำเร็จ',
         });
     });
@@ -138,7 +138,7 @@ app.post('/Candidate/Login', async (req, res) => {
                 }
                 return res.status(200).json({
                     status: 'success',
-                    redirect: 'candidate-dashboard.html',
+                    redirect: '/pages/candidate/dashboard',
                     msg: 'เข้าสู่ระบบสำเร็จ'
                 });
             });
@@ -163,7 +163,7 @@ app.post('/Admin/Login', (req, res) => {
         if (results.length > 0) {
             req.session.role = 'admin';
             req.session.isLoggedIn = true;
-            res.status(200).json({ status: 'success', redirect: 'admin-dashboard.html', msg: 'Admin Login Success' });
+            res.status(200).json({ status: 'success', redirect: '/pages/admin/dashboard', msg: 'Admin Login Success' });
         } else {
             res.status(401).json({ status: 'fail', msg: 'Admin Username/Password ผิด' });
         }
@@ -704,10 +704,25 @@ app.put('/admin/control', (req, res) => {
 });
 
 // ======================================== ROUTE ========================================
+const pageRoutes = {
+    admin: ['login', 'candidates', 'voters', 'control', 'dashboard', 'results'],
+    candidate: ['login', 'register', 'info', 'manage', 'dashboard', 'results'],
+    voter: ['login', 'candidates', 'voting', 'history', 'dashboard', 'results']
+};
 
-//candidates page
-app.get("/pages/admin/candidates", (req, res) => {
-    res.sendFile(path.join(__dirname, "public/HTML/admin-candidates.html"));
+function resolvePageFilename(section, page) {
+    if (page === 'dashboard') return 'dashboard.html';
+    if (page === 'results') return 'results.html';
+    return `${section}-${page}.html`;
+}
+
+app.get('/pages/:section/:page', (req, res) => {
+    const { section, page } = req.params;
+    if (!pageRoutes[section] || !pageRoutes[section].includes(page)) {
+        return res.status(404).send('Page not found');
+    }
+
+    res.sendFile(path.join(__dirname, 'public', 'HTML', resolvePageFilename(section, page)));
 });
 
 //root
