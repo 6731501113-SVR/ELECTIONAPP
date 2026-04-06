@@ -6,8 +6,10 @@ const argon2 = require('argon2');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 
-// Serve static files from the public directory at root
-app.use(express.static(path.join(__dirname, "public")));
+// Serve only public static assets needed by the frontend (CSS / JS)
+app.use('/CSS', express.static(path.join(__dirname, 'public', 'CSS')));
+app.use('/JS', express.static(path.join(__dirname, 'public', 'JS')));
+
 // Middleware to parse JSON and URL-encoded bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -770,22 +772,63 @@ app.post('/logout', async (req, res) => {
 });
 
 // ======================================== ROUTE ========================================
+// หน้าเพจทั้งหมด
 const pageRoutes = {
     admin: ['login', 'candidates', 'voters', 'control', 'dashboard', 'results'],
     candidate: ['login', 'register', 'info', 'manage', 'dashboard', 'results'],
     voter: ['login', 'candidates', 'voting', 'history', 'dashboard', 'results']
 };
 
+// สำหรับเชื่อมชื่อไฟล์
 function resolvePageFilename(section, page) {
     if (page === 'dashboard') return 'dashboard.html';
     if (page === 'results') return 'results.html';
     return `${section}-${page}.html`;
 }
+// สำหรับตรวจสอบสิทธิ์การเข้าถึงหน้าเพจ
+function isPageAccessible(section, page, req, res) {
+    const publicPages = {
+        admin: ['login'],
+        candidate: ['login', 'register'],
+        voter: ['login']
+    };
 
+    if (publicPages[section] && publicPages[section].includes(page)) {
+        return true;
+    }
+
+    if (!req.session.isLoggedIn) {
+        res.redirect(`/pages/${section}/login`);
+        return false;
+    }
+
+    if (section === 'admin' && req.session.role !== 'admin') {
+        res.redirect('/pages/admin/login');
+        return false;
+    }
+
+    if (section === 'candidate' && req.session.role !== 'candidate') {
+        res.redirect('/pages/candidate/login');
+        return false;
+    }
+
+    if (section === 'voter' && req.session.role !== 'voter') {
+        res.redirect('/pages/voter/login');
+        return false;
+    }
+
+    return true;
+}
+
+// dynamic route นั่นเอง
 app.get('/pages/:section/:page', (req, res) => {
     const { section, page } = req.params;
     if (!pageRoutes[section] || !pageRoutes[section].includes(page)) {
         return res.status(404).send('Page not found');
+    }
+
+    if (!isPageAccessible(section, page, req, res)) {
+        return;
     }
 
     res.sendFile(path.join(__dirname, 'public', 'HTML', resolvePageFilename(section, page)));
