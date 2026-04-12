@@ -325,7 +325,8 @@ app.get('/voter/candidates', async (req, res) => {
 // 2. บันทึกโหวต 
 app.post('/voter/vote', async (req, res) => {
     try {
-        const { citizen_id, can_id } = req.body;
+        const citizen_id = req.session.citizen_id;
+        const { can_id } = req.body;
 
         if (!can_id || !citizen_id) {
             return res.status(401).send('Candidate ID and Citizen ID are required');
@@ -708,6 +709,7 @@ app.post('/logout', async (req, res) => {
             console.error('Logout Error:', err);
             return res.status(500).json({ status: 'error', msg: 'เกิดข้อผิดพลาดในการ logout' });
         }
+        res.clearCookie('connect.sid'); // ล้าง cookie ของ session ด้วย
         res.status(200).json({ status: 'success', msg: 'Logout สำเร็จ' });
     });
 });
