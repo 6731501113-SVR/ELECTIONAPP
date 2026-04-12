@@ -11,7 +11,7 @@
 
     <nav class="navbar candidate" style="background-color: #16a34a; color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box;">
         <h2 style="margin: 0;">MFU Voting - Candidate</h2>
-        <a href="/" class="btn" style="background: white; color: #16a34a; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
+        <a href="/" onclick="logout()" class="btn" style="background: white; color: #16a34a; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
     </nav>
 
     <div class="nav-links" style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 65px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
@@ -159,6 +159,12 @@
             el.style.display = 'block';
             el.style.background = success ? '#dcfce7' : '#fee2e2';
             el.style.color      = success ? '#166634' : '#991b1b';
+        }
+
+        function logout() {
+            fetch('/logout', { method: 'POST' })
+                .then(() => window.location.href = '/')
+                .catch(err => console.error("Logout error:", err));
         }
     </script>
 

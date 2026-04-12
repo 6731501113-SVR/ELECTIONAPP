@@ -71,6 +71,11 @@
             const candidate_id = document.getElementById('candidate_id').value.trim().toUpperCase();
             const password = document.getElementById('password').value.trim();
 
+            if (!candidate_id || !password) {
+                alert('Please enter both Candidate ID and Password.');
+                return;
+            }
+
             const response = await fetch('/Candidate/Login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

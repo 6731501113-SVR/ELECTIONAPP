@@ -40,7 +40,7 @@
 
     <nav class="navbar voter" style="background-color: #2563eb; color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box;">
         <h2 style="margin: 0;">MFU Voting - Voter</h2>
-        <a href="/" class="btn" style="background: white; color: #2563eb; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
+        <a href="/" onclick="logout()" class="btn" style="background: white; color: #2563eb; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">Logout</a>
     </nav>
 
 
@@ -114,6 +114,12 @@
                 console.error('❌ Failed to fetch data:', error);
                 document.getElementById('candidateGrid').innerHTML = '<p style="color:red; text-align:center; width: 100%; grid-column: 1 / -1;">Error loading candidate data. Please try again later.</p>';
             });
+
+        function logout() {
+            fetch('/logout', { method: 'POST' })
+                .then(() => window.location.href = '/')
+                .catch(err => console.error("Logout error:", err));
+        }
     </script>
 </body>
 </html>

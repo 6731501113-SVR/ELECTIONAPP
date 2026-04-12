@@ -28,7 +28,7 @@
         box-sizing: border-box;
       ">
     <h2 style="margin: 0">MFU Voting - Candidate</h2>
-    <a href="/" class="btn" style="
+    <a href="/" onclick="logout()" class="btn" style="
           background: white;
           color: #16a34a;
           padding: 8px 20px;
@@ -264,6 +264,12 @@
             });
         });
     });
+
+    function logout() {
+        fetch('/logout', { method: 'POST' })
+            .then(() => window.location.href = '/')
+            .catch(err => console.error("Logout error:", err));
+    }
   </script>
 </body>
 

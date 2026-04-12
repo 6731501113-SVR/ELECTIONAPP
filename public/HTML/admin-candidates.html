@@ -74,7 +74,7 @@
     <nav class="navbar admin"
         style="background-color: #9333ea; color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; height: 70px; z-index: 1000; box-sizing: border-box;">
         <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; white-space: nowrap;">MFU Voting - Admin</h2>
-        <a href="/" class="btn"
+        <a href="/" onclick="logout()" class="btn"
             style="background: white; color: #9333ea; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; flex-shrink: 0;">Logout</a>
     </nav>
 
@@ -336,6 +336,14 @@
 
         loadNextID();
         loadCandidates();
+    </script>
+
+    <script>
+        function logout() {
+            fetch('/logout', { method: 'POST' })
+                .then(() => window.location.href = '/')
+                .catch(err => console.error("Logout error:", err));
+        }
     </script>
 </body>
 

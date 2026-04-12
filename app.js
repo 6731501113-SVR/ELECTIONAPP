@@ -280,8 +280,8 @@ app.get('/results', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Results Error:', err);
-        res.status(500).json({ error: 'Server error', message: err.message });
+        console.error('Results Error:', error);
+        res.status(500).json({ error: 'Server error', message: error.message });
     }
 
 });
