@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Candidate Information</title>
-  <link rel="stylesheet" href="/CSS/style.css" />
+  <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 </head>
 
@@ -156,6 +156,28 @@
                 color: #94a3b8;
                 font-size: 0.85rem;
                 text-transform: uppercase;
+              ">Personal Info</label>
+          <div id="display-info" style="
+                background: #f8fafc;
+                padding: 20px;
+                border-radius: 12px;
+                border: 1px solid #f1f5f9;
+                line-height: 1.8;
+                color: #334155;
+                white-space: pre-line;
+              ">
+            Loading info...
+          </div>
+        </div>
+
+        <div style="margin-bottom: 25px">
+          <label style="
+                display: block;
+                margin-bottom: 10px;
+                font-weight: 600;
+                color: #94a3b8;
+                font-size: 0.85rem;
+                text-transform: uppercase;
               ">Policies & Vision</label>
           <div id="display-policy" style="
                 background: #f8fafc;
@@ -195,9 +217,9 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ดึง ID จาก Session API แทน localStorage
-      fetch('/session/check')
-        .then(res => res.json())
-        .then(data => {
+      fetch("/session/check")
+        .then((res) => res.json())
+        .then((data) => {
           if (!data.isLoggedIn || !data.can_id) {
             alert("Session expired, please login again.");
             window.location.href = "/pages/candidate/login";
@@ -213,7 +235,6 @@
             credentials: "include",
           })
             .then((response) => {
-              // จัดการกรณีสำเร็จ (200) และผิดพลาด (500) ตามที่อาจารย์กำหนด
               if (response.status === 200) {
                 return response.json();
               } else {
@@ -226,7 +247,10 @@
               if (result && result.can_id) {
                 document.getElementById("display-can-id").innerText =
                   result.can_id;
-                document.getElementById("display-name").innerText = result.name;
+                document.getElementById("display-name").innerText =
+                  result.name;
+                document.getElementById("display-info").innerText =
+                  result.personal_info;
                 document.getElementById("display-policy").innerText =
                   result.policy;
               }

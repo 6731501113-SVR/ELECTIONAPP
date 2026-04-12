@@ -390,7 +390,7 @@ app.get('/candidate/profile', async (req, res) => {
     }
 
     try {
-        const sql = "SELECT can_id, name, policy FROM candidates WHERE can_id = ?";
+        const sql = "SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?";
         const [results] = await db.query(sql, [can_id]);
         res.status(200).json(results[0] || {});
     } catch (err) {
