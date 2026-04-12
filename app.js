@@ -27,8 +27,8 @@ app.use(session({
     store: new MemoryStore({ checkPeriod: 24 * 60 * 60 * 1000 }) // ล้าง session ที่หมดอายุทุก 24 ชั่วโมง
 }));
 // middleware ล้าง cache หน้าเพจไม่ให้กลับไปดูได้หลัง Logout
-app.use((req,res,next)=>{
-    res.set('Cache-Control','no-store');
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store');
     next();
 });
 // check database connection
@@ -727,43 +727,24 @@ function resolvePageFilename(section, page) {
     return `${section}-${page}.html`;
 }
 // สำหรับตรวจสอบสิทธิ์การเข้าถึงหน้าเพจ
-function isPageAccessible(section, page, req, res) {
-    const publicPages = {
-        admin: ['login'],
-        candidate: ['login', 'register'],
-        voter: ['login']
-    };
-
-    if (publicPages[section] && publicPages[section].includes(page)) {
-        return true;
-    }
-
+function requireLogin(req, res, next) {
     if (!req.session.isLoggedIn) {
-        res.redirect(`/pages/${section}/login`);
-        return false;
+        return res.redirect('/');
     }
-    
-    if (req.session.isLoggedIn && page === 'login') {
-        res.redirect(`/pages/${req.session.role}/dashboard`);
-        return false;
-    }
+    next();
+}
+function requireRole(role) {
+    return function (req, res, next) {
+        if (!req.session.isLoggedIn) {
+            return res.redirect('/');
+        }
 
-    if (section === 'admin' && req.session.role !== 'admin') {
-        res.redirect('/pages/admin/login');
-        return false;
-    }
+        if (req.session.role !== role) {
+            return res.redirect(`/pages/${role}/login`);
+        }
 
-    if (section === 'candidate' && req.session.role !== 'candidate') {
-        res.redirect('/pages/candidate/login');
-        return false;
-    }
-
-    if (section === 'voter' && req.session.role !== 'voter') {
-        res.redirect('/pages/voter/login');
-        return false;
-    }
-
-    return true;
+        next();
+    };
 }
 
 // dynamic route นั่นเอง
@@ -773,11 +754,25 @@ app.get('/pages/:section/:page', (req, res) => {
         return res.status(404).send('Page not found');
     }
 
-    if (!isPageAccessible(section, page, req, res)) {
-        return;
+    // login page
+    if (page === 'login' || page === 'register') {
+        return res.sendFile(
+            path.join(__dirname, 'public', 'HTML', resolvePageFilename(section, page))
+        );
+    } 
+
+    // check isLoggedIn from session
+    if (!req.session.isLoggedIn) {
+        return res.redirect('/pages/' + section + '/login');
     }
 
-    res.sendFile(path.join(__dirname, 'public', 'HTML', resolvePageFilename(section, page)));
+    if (req.session.role !== section) {
+        return res.redirect(`/pages/${req.session.role}/dashboard`);
+    }
+
+    res.sendFile(
+        path.join(__dirname, 'public', 'HTML', resolvePageFilename(section, page))
+    );
 });
 
 //root
