@@ -36,11 +36,11 @@ db.getConnection((err, connection) => {
 // ======================================== LOGIN & REGISTER ========================================
 
 // --- ส่วนของ Voter Login ---
-app.post('/Voter/Login', async (req, res) => {
+app.post('/voter/login', async (req, res) => {
     try {
         const { citizen_id, laser_id } = req.body;
         const sql = "SELECT citizen_id, laser_id, is_active FROM voters WHERE citizen_id = ? AND laser_id = ?";
-        
+
         const [results] = await db.query(sql, [citizen_id, laser_id]);
 
         if (results.length === 0) {
@@ -73,7 +73,7 @@ app.post('/Voter/Login', async (req, res) => {
 
 
 // candidate-register
-app.post('/Candidate/Register', async (req, res) => {
+app.post('/candidate/register', async (req, res) => {
     const can_id = String(req.body.can_id || '').trim().toUpperCase();
     const name = String(req.body.name || '').trim();
     const policy = String(req.body.policy || '').trim();
@@ -112,7 +112,7 @@ app.post('/Candidate/Register', async (req, res) => {
 
 
 // --- ส่วนของ Candidate Login ---
-app.post('/Candidate/Login', async (req, res) => {
+app.post('/candidate/login', async (req, res) => {
     const candidate_id = String(req.body.candidate_id || '').trim().toUpperCase();
     const password = String(req.body.password || '').trim();
 
@@ -182,12 +182,12 @@ app.post('/Candidate/Login', async (req, res) => {
 });
 
 // --- ส่วนของ Admin Login ---
-app.post('/Admin/Login', async (req, res) => {
+app.post('/admin/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         const sql = "SELECT * FROM admin WHERE username = ? AND password = ?";
         const [results] = await db.query(sql, [username, password]);
-        
+
         if (results.length > 0) {
             req.session.role = 'admin';
             req.session.isLoggedIn = true;
@@ -290,7 +290,7 @@ app.get('/results', async (req, res) => {
 // ======================================== VOTER ========================================
 
 // 1. ดึงรายชื่อผู้สมัคร
-app.get('/Voter/candidates', async (req, res) => {
+app.get('/voter/candidates', async (req, res) => {
     try {
         const sql = "SELECT can_id, name, policy FROM candidates";
         const [results] = await db.query(sql);
@@ -302,7 +302,7 @@ app.get('/Voter/candidates', async (req, res) => {
 });
 
 // 2. บันทึกโหวต 
-app.post('/Voter/vote', async (req, res) => {
+app.post('/voter/vote', async (req, res) => {
     try {
         const { citizen_id, can_id } = req.body;
 
@@ -313,7 +313,7 @@ app.post('/Voter/vote', async (req, res) => {
         // 1) ตรวจ voter ทะเบียนอยู่, ยังไม่โหวต, active
         const checkVoterSql = "SELECT has_voted, is_active FROM voters WHERE citizen_id = ?";
         const [voterResult] = await db.query(checkVoterSql, [citizen_id]);
-        
+
         if (voterResult.length === 0) return res.status(404).send('Voter not found');
         const voter = voterResult[0];
         if (voter.is_active === 0) return res.status(403).send('บัญชีผู้ใช้ถูกปิดใช้งาน');
@@ -322,14 +322,14 @@ app.post('/Voter/vote', async (req, res) => {
         // 2) ตรวจ candidate active
         const checkCandidateSql = "SELECT is_active FROM candidates WHERE can_id = ?";
         const [candidateResult] = await db.query(checkCandidateSql, [can_id]);
-        
+
         if (candidateResult.length === 0) return res.status(404).send('Candidate not found');
         if (candidateResult[0].is_active === 0) return res.status(403).send('ผู้สมัครถูกปิดใช้งาน');
 
         // 3) เช็คระบบเปิดโหวต
         const checkSystemSql = "SELECT is_open FROM admin LIMIT 1";
         const [adminResult] = await db.query(checkSystemSql);
-        
+
         if (adminResult.length === 0 || adminResult[0].is_open === 0) {
             return res.status(403).send('ระบบปิดโหวตแล้ว (Voting is closed)');
         }
@@ -345,7 +345,7 @@ app.post('/Voter/vote', async (req, res) => {
         // 6) อัพเดต voter has_voted
         const updateVoterSql = "UPDATE voters SET has_voted = 1 WHERE citizen_id = ?";
         await db.query(updateVoterSql, [citizen_id]);
-        
+
         console.log(`✅ Vote saved! Citizen ${citizen_id} voted for ${can_id}`);
         res.status(200).send('Vote submitted successfully');
     } catch (error) {
@@ -355,9 +355,9 @@ app.post('/Voter/vote', async (req, res) => {
 });
 
 // 3. ดูประวัติการโหวต
-app.get('/Voter/history/:citizen_id', async (req, res) => {
+app.get('/voter/history/:citizen_id', async (req, res) => {
     try {
-        const citizenId = req.params.citizen_id;
+        const citizenId = res.session.citizen_id || req.params.citizen_id;
         const sql = `
             SELECT v.vote_timestamp, c.name AS candidate_name, c.can_id
             FROM votes v
@@ -365,7 +365,7 @@ app.get('/Voter/history/:citizen_id', async (req, res) => {
             WHERE v.citizen_id = ?
         `;
         const [results] = await db.query(sql, [citizenId]);
-        
+
         if (results.length > 0) {
             res.status(200).json({ hasVoted: true, data: results });
         } else {
@@ -398,81 +398,28 @@ app.get('/candidate/profile', async (req, res) => {
     }
 });
 
-// // บันทึกการแก้ไข name, personal_info, policy (ปุ่ม Save Changes)
-// app.put('/candidate/me', async (req, res) => {
-//     // รับค่าจาก body
-//     const { can_id, name, policy } = req.body;
-
-//     try {
-//         // เตรียมคำสั่ง SQL สำหรับการอัปเดตข้อมูล
-//         const sql = "UPDATE candidates SET name = ?, policy = ? WHERE can_id = ?";
-
-//         // รันคำสั่ง SQL ผ่าน Database Pool
-//         await db.query(sql, [name, policy, can_id]);
-
-//         // กรณีสำเร็จ (Case 200): ส่งข้อความแจ้งเตือนกลับไป
-//         res.status(200).json({
-//             message: 'Profile updated successfully'
-//         });
-
-//     } catch (err) {
-//         // กรณีเกิดข้อผิดพลาด (Case 500): เช่น Database หลุด หรือ SQL ผิดพลาด
-//         console.error('Update Error:', err);
-//         res.status(500).json({
-//             error: 'DB Error',
-//             message: err.message
-//         });
-//     }
-// });
-
-// app.get('/Candidate/me', (req, res) => {
-//     const can_id = req.query.can_id || req.body?.can_id;
-//     if (!can_id) {
-//         return res.status(401).json({ error: 'Bad Request', message: 'can_id is required (query or body)' });
-//     }
-
-//     const sql = `SELECT can_id, name, personal_info, policy, vote_score, is_active FROM candidates WHERE can_id = ?`;
-//     db.query(sql, [can_id], (err, results) => {
-//         if (err) {
-//             return res.status(500).json({ error: 'Server error', message: err.message });
-//         }
-//         if (results.length === 0) {
-//             return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
-//         }
-//         const candidate = results[0];
-//         return res.status(200).json({
-//             can_id: candidate.can_id,
-//             name: candidate.name,
-//             personal_info: candidate.personal_info,
-//             policy: candidate.policy,
-//             vote_score: candidate.vote_score,
-//             is_active: candidate.is_active
-//         });
-//     });
-// });
-
 // GET /candidate/info?can_id=C001
 // ดึงข้อมูลมาแสดงในฟอร์มหน้า Manage Info
 // ใช้ can_id จาก query param (เหมือนที่เพื่อนใช้ใน /candidate/profile)
 app.get('/candidate/info', async (req, res) => {
     try {
-        const can_id = req.query.can_id;
+        const can_id = res.session.can_id || req.query.can_id;
 
-        
-if (!can_id) {
-  return res.status(400).json({ error: 'Validation Error', message: 'can_id is required' });
-}
 
-const [rows] = await db.query(
-  "SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?",
-  [can_id]
-);
+        if (!can_id) {
+            return res.status(400).json({ error: 'Validation Error', message: 'can_id is required' });
+        }
 
-if (rows.length === 0) {
-  return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
-}
+        const [rows] = await db.query(
+            "SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?",
+            [can_id]
+        );
 
-res.json(rows[0]);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
+        }
+
+        res.json(rows[0]);
 
 
     } catch (err) {
@@ -539,60 +486,12 @@ app.put('/candidate/info', async (req, res) => {
             data: updated[0]
         });
 
-} catch (err) {
-console.error('Update Candidate Info Error:', err);
-res.status(500).json({ error: 'Server error', message: err.message });
-}
+    } catch (err) {
+        console.error('Update Candidate Info Error:', err);
+        res.status(500).json({ error: 'Server error', message: err.message });
+    }
 });
 
-
-// // บันทึกการแก้ไข name, personal_info, policy (ปุ่ม Save Changes)
-// app.put('/Candidate/me', (req, res) => {
-//     const can_id = req.query.can_id || req.body?.can_id;
-//     const { name, personal_info, policy } = req.body || {};
-
-//     if (!can_id) {
-//         return res.status(401).json({ error: 'Bad Request', message: 'can_id is required (query or body)' });
-//     }
-//     if (!name && !personal_info && !policy) {
-//         return res.status(400).json({ error: 'Validation Error', message: 'Please provide at least one field to update' });
-//     }
-//     if (name !== undefined && name.trim() === '') {
-//         return res.status(400).json({ error: 'Validation Error', message: 'name must not be empty' });
-//     }
-
-//     const fields = [];
-//     const values = [];
-
-//     if (name !== undefined) {
-//         fields.push('name = ?');
-//         values.push(name.trim());
-//     }
-//     if (personal_info !== undefined) {
-//         fields.push('personal_info = ?');
-//         values.push(personal_info);
-//     }
-//     if (policy !== undefined) {
-//         fields.push('policy = ?');
-//         values.push(policy);
-//     }
-
-//     values.push(can_id);
-//     const sql = `UPDATE candidates SET ${ fields.join(', ') } WHERE can_id = ? `;
-
-//     db.query(sql, values, (err) => {
-//         if (err) {
-//             return res.status(500).json({ error: 'Server error', message: err.message });
-//         }
-
-//         db.query('SELECT can_id, name, personal_info, policy FROM candidates WHERE can_id = ?', [can_id], (err2, rows) => {
-//             if (err2) {
-//                 return res.status(500).json({ error: 'Server error', message: err2.message });
-//             }
-//             return res.status(200).json({ success: true, message: 'Profile updated successfully', data: rows[0] });
-//         });
-//     });
-// });
 
 // ======================================== ADMIN ========================================
 
@@ -638,17 +537,17 @@ app.post('/admin/candidates', async (req, res) => {
     try {
         const sqlLast = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
         const [result] = await db.query(sqlLast);
-        
+
         let nextId = "C001";
         if (result.length > 0) {
             const lastId = result[0].can_id;
             const num = parseInt(lastId.substring(1)) + 1;
             nextId = "C" + num.toString().padStart(3, "0");
         }
-        
+
         const insertSql = "INSERT INTO candidates (can_id) VALUES (?)";
         await db.query(insertSql, [nextId]);
-        
+
         res.status(200).json({ can_id: nextId });
     } catch (error) {
         console.error('Admin Add Candidate Error:', error.message);
@@ -661,7 +560,7 @@ app.get("/admin/candidates/next-id", async (req, res) => {
     try {
         const sql = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
         const [result] = await db.query(sql);
-        
+
         let nextId = "C001";
         if (result.length > 0) {
             const lastId = result[0].can_id;
@@ -687,7 +586,7 @@ app.put('/admin/candidates/:can_id', async (req, res) => {
 
         const sql = "UPDATE candidates SET is_active = ? WHERE can_id = ?";
         const [result] = await db.query(sql, [is_active, can_id]);
-        
+
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Not Found', message: 'Candidate not found' });
         }
@@ -710,7 +609,7 @@ app.put('/admin/voters/:citizen_id', async (req, res) => {
 
         const sql = "UPDATE voters SET is_active = ? WHERE citizen_id = ?";
         const [result] = await db.query(sql, [is_active, citizen_id]);
-        
+
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Not Found', message: 'Voter not found' });
         }
@@ -755,12 +654,24 @@ app.put('/admin/control', async (req, res) => {
 // GET /session/check - ตรวจสอบ session
 app.get('/session/check', (req, res) => {
     if (req.session.isLoggedIn) {
-        res.status(200).json({
-            isLoggedIn: true,
-            role: req.session.role,
-            citizen_id: req.session.citizen_id,
-            can_id: req.session.can_id
-        });
+        if (req.session.role === 'admin') {
+            return res.status(200).json({
+                isLoggedIn: true,
+                role: req.session.role
+            });
+        } else if (req.session.role === 'candidate') {
+            return res.status(200).json({
+                isLoggedIn: true,
+                role: req.session.role,
+                can_id: req.session.can_id
+            });
+        } else if (req.session.role === 'voter') {
+            return res.status(200).json({
+                isLoggedIn: true,
+                role: req.session.role,
+                citizen_id: req.session.citizen_id,
+            });
+        }
     } else {
         res.status(401).json({
             isLoggedIn: false,
