@@ -39,26 +39,42 @@ db.getConnection((err, connection) => {
 app.post('/voter/login', async (req, res) => {
     try {
         const { citizen_id, laser_id } = req.body;
-        const sql = "SELECT citizen_id, laser_id, is_active FROM voters WHERE citizen_id = ? AND laser_id = ?";
 
-        const [results] = await db.query(sql, [citizen_id, laser_id]);
+        // 1. ค้นหาผู้ใช้จาก citizen_id เพื่อดึง Hash ออกมาตรวจสอบ
+        const sql = "SELECT citizen_id, laser_id, is_active FROM voters WHERE citizen_id = ?";
+        const [results] = await db.query(sql, [citizen_id]);
 
+        // 2. ถ้าไม่พบ citizen_id ในระบบ
         if (results.length === 0) {
-            return res.status(401).json({ status: 'fail', msg: 'ข้อมูลไม่ถูกต้อง' });
+            return res.status(401).json({ status: 'fail', msg: 'ข้อมูลบัตรประชาชนหรือ Laser ID ไม่ถูกต้อง' });
         }
 
         const voter = results[0];
-        if (voter.is_active === 0) {
-            return res.status(403).json({ status: 'fail', msg: 'บัญชีถูกปิดใช้งาน' });
+
+        // 3. ตรวจสอบ Laser ID ด้วย Argon2 (เปรียบเทียบรหัสที่รับมา กับ Hash ในฐานข้อมูล)
+        const isMatch = await argon2.verify(voter.laser_id, laser_id);
+        if (!isMatch) {
+            return res.status(401).json({ status: 'fail', msg: 'ข้อมูลบัตรประชาชนหรือ Laser ID ไม่ถูกต้อง' });
         }
-        req.session.citizen_id = citizen_id;
+
+        // 4. ตรวจสอบสถานะการใช้งานบัญชี
+        if (voter.is_active === 0) {
+            return res.status(403).json({ status: 'fail', msg: 'บัญชีนี้ถูกปิดใช้งานชั่วคราว' });
+        }
+
+        // 5. เมื่อข้อมูลถูกต้องทั้งหมด ให้สร้างและบันทึก Session
+        req.session.citizen_id = voter.citizen_id;
         req.session.role = 'voter';
         req.session.isLoggedIn = true;
+
+        // บังคับให้บันทึก Session ลง Store ทันที
         req.session.save((err) => {
             if (err) {
                 console.error("Session Save Error:", err);
                 return res.status(500).json({ status: 'error', msg: 'ระบบ Session มีปัญหา' });
             }
+           
+            // ส่ง Response กลับไปให้ Frontend
             res.status(200).json({
                 status: 'success',
                 redirect: '/pages/voter/dashboard',
@@ -67,7 +83,7 @@ app.post('/voter/login', async (req, res) => {
         });
     } catch (error) {
         console.error('Voter Login Error:', error.message);
-        res.status(500).json({ status: 'error', msg: 'DB Error: ' + error.message });
+        res.status(500).json({ status: 'error', msg: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
     }
 });
 
