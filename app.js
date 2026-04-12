@@ -26,6 +26,11 @@ app.use(session({
     },
     store: new MemoryStore({ checkPeriod: 24 * 60 * 60 * 1000 }) // ล้าง session ที่หมดอายุทุก 24 ชั่วโมง
 }));
+// middleware ล้าง cache หน้าเพจไม่ให้กลับไปดูได้หลัง Logout
+app.use((req,res,next)=>{
+    res.set('Cache-Control','no-store');
+    next();
+});
 // check database connection
 db.getConnection((err, connection) => {
     if (err) console.log("❌ DB Connect Fail:", err.message);
@@ -371,9 +376,9 @@ app.post('/voter/vote', async (req, res) => {
 });
 
 // 3. ดูประวัติการโหวต
-app.get('/voter/history/:citizen_id', async (req, res) => {
+app.get('/voter/history/', async (req, res) => {
     try {
-        const citizenId = res.session.citizen_id || req.params.citizen_id;
+        const citizenId = req.session.citizen_id;
         const sql = `
             SELECT v.vote_timestamp, c.name AS candidate_name, c.can_id
             FROM votes v
@@ -419,7 +424,7 @@ app.get('/candidate/profile', async (req, res) => {
 // ใช้ can_id จาก query param (เหมือนที่เพื่อนใช้ใน /candidate/profile)
 app.get('/candidate/info', async (req, res) => {
     try {
-        const can_id = res.session.can_id || req.query.can_id;
+        const can_id = req.session.can_id || req.query.can_id;
 
 
         if (!can_id) {
@@ -735,6 +740,11 @@ function isPageAccessible(section, page, req, res) {
 
     if (!req.session.isLoggedIn) {
         res.redirect(`/pages/${section}/login`);
+        return false;
+    }
+    
+    if (req.session.isLoggedIn && page === 'login') {
+        res.redirect(`/pages/${req.session.role}/dashboard`);
         return false;
     }
 
