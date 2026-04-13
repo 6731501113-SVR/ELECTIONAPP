@@ -546,8 +546,9 @@ app.get('/admin/voters', async (req, res) => {
 app.post('/admin/voters', async (req, res) => {
     try {
         const { citizen_id, laser_id, name } = req.body;
+        const hashed_laser_id = await argon2.hash(laser_id);
         const insertSql = "INSERT INTO voters (citizen_id, laser_id, name, has_voted, is_active) VALUES (?, ?, ?, ?, ?)";
-        await db.query(insertSql, [citizen_id, laser_id, name, 0, 1]);
+        await db.query(insertSql, [citizen_id, hashed_laser_id, name, 0, 1]);
         return res.status(200).json({ success: true, message: 'Voter added successfully' });
     } catch (error) {
         console.error('Admin Add Voter Error:', error.message);
