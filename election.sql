@@ -7,7 +7,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 28, 2026 at 06:50 AM
+-- Generation Time: Apr 13, 2026 at 01:51 PM
 -- Server version: 11.4.5-MariaDB-log
 -- PHP Version: 8.4.6
 
@@ -65,10 +65,11 @@ CREATE TABLE `candidates` (
 --
 
 INSERT INTO `candidates` (`can_id`, `password`, `name`, `personal_info`, `policy`, `vote_score`, `is_active`) VALUES
-('C001', 'pass1234', 'Dr. Anon Meekwamroo', 'Info', 'Improve university facilities and infrastructure.', 0, 1),
-('C002', 'pass1234', 'Asst. Prof. Suda Pattana', 'Info', 'Expand campus green spaces and sustainability.', 0, 1),
-('C003', 'pass1234', 'Mr. Prasit Kaona', 'Info', 'Renovate digital library systems.', 0, 1),
-('C004', 'pass1234', 'Assoc. Prof. Somchai Rakdee', 'Info', 'Upgrade university internet speed and provide free software licenses for all students.', 0, 1);
+('C001', '$argon2id$v=19$m=65536,t=3,p=4$Rso4oFmofdhUsa0mIPxrrw$4E+FnN8VYEMz3JK8ryHrvcWpGywEpEfmtydLsZ8lJKQ', 'Dr. Anon Meekwamroo', 'Graduated Master\'s Degree of Black Magic from Azkaban ', 'Improve university facilities and infrastructure.', 1, 1),
+('C002', '$argon2id$v=19$m=65536,t=3,p=4$Rso4oFmofdhUsa0mIPxrrw$4E+FnN8VYEMz3JK8ryHrvcWpGywEpEfmtydLsZ8lJKQ', 'Asst. Prof. Suda Pattana', 'Info', 'Expand campus green spaces and sustainability.', 0, 1),
+('C003', '$argon2id$v=19$m=65536,t=3,p=4$Rso4oFmofdhUsa0mIPxrrw$4E+FnN8VYEMz3JK8ryHrvcWpGywEpEfmtydLsZ8lJKQ', 'Mr. Prasit Kaona', 'Info', 'Renovate digital library systems.', 0, 1),
+('C004', '$argon2id$v=19$m=65536,t=3,p=4$k/Crw53zAduS7e/NckSV9w$gRO5JTAUS7uQU9hLHNhQSmvSDyS4JS9eTf7bvYG68Go', 'Assoc. Prof. Somchai Rakdee', 'Info', 'Upgrade university internet speed and provide free software licenses for all students.', 0, 1),
+('C005', '$argon2id$v=19$m=65536,t=3,p=4$z5N7+awqVloawKQNRwV6JQ$+6OIZ0weqC3UkMCyjCZ57+HaoeRXmH1uCXUOOIAkM3I', 'Beta tester', 'Born 2 Chome-34-10 Ebisu, Shibuya, Tokyo 150-0013 Japan\nGraduated from harward in 3 year old', 'สร้าง Death game', 2, 1);
 
 -- --------------------------------------------------------
 
@@ -78,7 +79,7 @@ INSERT INTO `candidates` (`can_id`, `password`, `name`, `personal_info`, `policy
 
 CREATE TABLE `voters` (
   `citizen_id` varchar(13) NOT NULL,
-  `laser_id` varchar(20) NOT NULL,
+  `laser_id` varchar(97) NOT NULL,
   `name` varchar(30) NOT NULL,
   `has_voted` tinyint(1) DEFAULT 0,
   `is_active` tinyint(1) DEFAULT 1
@@ -89,7 +90,10 @@ CREATE TABLE `voters` (
 --
 
 INSERT INTO `voters` (`citizen_id`, `laser_id`, `name`, `has_voted`, `is_active`) VALUES
-('1234567890123', 'ME1234567890', 'TESTER', 0, 1);
+('1234', '$argon2id$v=19$m=65536,t=3,p=4$w3NXwIsAc82w+nQTWHXCFQ$GqPJUHxMxf+JZz+4+iVkrKimgJJ/hTohQa/mRi1D2x8', 'tttt', 1, 1),
+('1234567890123', '$argon2id$v=19$m=65536,t=3,p=4$x0QGvSMEixgDZERoqZtiNA$8d/qgKRNDMCH+m2pjpunqqAFOqloLxnYY6q6CA0b0vw', 'TESTER', 0, 1),
+('2222', '$argon2id$v=19$m=65536,t=3,p=4$YMewE3ibQLm7JAA8GFkMGg$wmVylPVNAa8RERpdAyzMf8Sxme59aqwno1WcdDqCmZQ', 'REINE DE PRETICOR', 1, 1),
+('3333', '$argon2id$v=19$m=65536,t=3,p=4$mkGZbVL6gx0+b//O2ysHoA$qOLMF0EYHYRO79LzVeEVjMb9T9cYCUkjcMiajrGszas', 'ALAIN GUILLOTIN', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -109,7 +113,9 @@ CREATE TABLE `votes` (
 --
 
 INSERT INTO `votes` (`vote_id`, `citizen_id`, `can_id`, `vote_timestamp`) VALUES
-(9, '1234567890123', 'C001', '2026-03-24 09:13:15');
+(15, '1234', 'C005', '2026-04-13 18:19:57'),
+(16, '2222', 'C005', '2026-04-13 20:12:00'),
+(17, '3333', 'C001', '2026-04-13 20:18:26');
 
 --
 -- Indexes for dumped tables
@@ -149,7 +155,7 @@ ALTER TABLE `votes`
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Constraints for dumped tables
