@@ -311,14 +311,16 @@ app.get('/results', async (req, res) => {
 // ======================================== VOTER ========================================
 
 // 1. ดึงรายชื่อผู้สมัคร
+// ดึงข้อมูล Candidate ทั้งหมดส่งให้หน้าเว็บ
 app.get('/voter/candidates', async (req, res) => {
     try {
-        const sql = "SELECT can_id, name, policy FROM candidates";
-        const [results] = await db.query(sql);
-        res.status(200).json(results);
+        const [candidates] = await db.query(
+            "SELECT can_id AS Candidate_ID, name AS Name, policy AS Policy FROM candidates"
+        );        
+        res.status(200).json(candidates);
     } catch (error) {
-        console.error('Voter Candidates Error:', error.message);
-        res.status(500).send('Server error: ' + error.message);
+        console.error("Database Error:", error); 
+        res.status(500).json({ error: "Failed to fetch candidates" });
     }
 });
 
