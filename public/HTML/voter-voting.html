@@ -116,65 +116,137 @@
 
 
     <script>
-        // ==========================================
-        // 1. ดึงข้อมูลผู้สมัครมาแสดงเป็นตัวเลือก 
-        // ==========================================
-        fetch('/Voter/candidates')
-            .then(response => response.json())
-            .then(data => {
-                const list = document.getElementById('candidateList');
-                list.innerHTML = '';
+        const confirmBtn = document.getElementById("confirmBtn");
+        confirmBtn.disabled = true;
+        confirmBtn.style.backgroundColor = "#94a3b8";
+        confirmBtn.style.cursor = "not-allowed";
+        // check has_voted
+        fetch('/voter/has_voted').then(res => res.json()).then(data => {
+            if (data.has_voted) {
+                // ==========================================
+                // 0. ถ้าโหวตแล้ว แสดงข้อความและปิดการโหวต
+                // ==========================================
+                const list = document.getElementById("candidateList");
+                list.innerHTML = "";
+                const message = document.createElement("p");
+                message.textContent = "I WILL NEVER GONNA GIVE YOU A CHANCE TO VOTE AGAIN! (You have already voted)";
+                message.style.textAlign = "center";
+                message.style.color = "#ef4444";
+                message.style.fontSize = "1.1rem";
+                const image = document.createElement("img");
+                image.src = "/img/never-gonna-give-you-up.gif";
+                image.style.display = "block";
+                image.style.margin = "20px auto";
+                list.appendChild(message);
+                list.appendChild(image);
+            } else {
+                // ==========================================
+                // 1. ดึงข้อมูลผู้สมัครมาแสดงเป็นตัวเลือก 
+                // ==========================================
+                fetch('/Voter/candidates').then(res => res.json()).then(data => {
+                    console.log("Fetched Candidates:", data);
+                    const list = document.getElementById("candidateList");
+                    list.innerHTML = "";
 
+                    const fragment = document.createDocumentFragment();
 
+                    const themeColors = [
+                        { bg: '#eff6ff', text: '#2563eb' },
+                        { bg: '#f0fdf4', text: '#16a34a' },
+                        { bg: '#faf5ff', text: '#9333ea' },
+                        { bg: '#fff7ed', text: '#ea580c' }
+                    ];
 
-                const themeColors = [
-                    { bg: '#eff6ff', text: '#2563eb' },
-                    { bg: '#f0fdf4', text: '#16a34a' },
-                    { bg: '#faf5ff', text: '#9333ea' },
-                    { bg: '#fff7ed', text: '#ea580c' }
-                ];
+                    data.forEach((candidate, index) => {
 
+                        const theme = themeColors[index % themeColors.length];
 
-                data.forEach((candidate, index) => {
-                    const theme = themeColors[index % themeColors.length];
+                        const label = document.createElement("label");
+                        label.className = "candidate-label";
 
+                        label.style.display = "flex";
+                        label.style.alignItems = "center";
+                        label.style.gap = "20px";
+                        label.style.padding = "20px";
+                        label.style.border = "1.5px solid #e2e8f0";
+                        label.style.borderRadius = "12px";
+                        label.style.cursor = "pointer";
 
-                    const candidateHTML = `
-                        <label class="candidate-label" style="display: flex; align-items: center; gap: 20px; padding: 20px; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.2s;">
-                            <input type="radio" name="candidate" value="${candidate.can_id}" style="width: 20px; height: 20px; cursor: pointer;">
-                            <div style="width: 50px; height: 50px; background: ${theme.bg}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: ${theme.text}; font-size: 1.5rem; flex-shrink: 0;">👤</div>
-                            <div style="flex-grow: 1;">
-                                <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b;">${candidate.name} <span style="font-weight: normal; color: #94a3b8; font-size: 0.9rem;">(${candidate.can_id})</span></h3>
-                                <p style="margin: 5px 0 0; color: #64748b; font-size: 0.9rem; line-height: 1.5;">${candidate.policy}</p>
-                            </div>
-                        </label>
-                    `;
-                    list.innerHTML += candidateHTML;
+                        const radio = document.createElement("input");
+                        radio.type = "radio";
+                        radio.name = "candidate";
+                        radio.value = candidate.Candidate_ID;
+                        radio.addEventListener("change", () => {
+                            confirmBtn.disabled = false;
+                            confirmBtn.style.backgroundColor = "#2563eb";
+                            confirmBtn.style.cursor = "pointer";
+                        });
+
+                        const icon = document.createElement("div");
+                        icon.textContent = "👤";
+
+                        icon.style.width = "50px";
+                        icon.style.height = "50px";
+                        icon.style.background = theme.bg;
+                        icon.style.borderRadius = "50%";
+                        icon.style.display = "flex";
+                        icon.style.alignItems = "center";
+                        icon.style.justifyContent = "center";
+                        icon.style.color = theme.text;
+                        icon.style.fontSize = "1.5rem";
+
+                        const info = document.createElement("div");
+                        info.style.flexGrow = "1";
+
+                        const name = document.createElement("h3");
+                        name.textContent = candidate.Name;
+
+                        name.style.margin = "0";
+                        name.style.fontSize = "1.1rem";
+                        name.style.color = "#1e293b";
+
+                        const idSpan = document.createElement("span");
+                        idSpan.textContent = ` (${candidate.Candidate_ID})`;
+                        idSpan.style.color = "#94a3b8";
+                        idSpan.style.fontWeight = "normal";
+                        idSpan.style.fontSize = "0.9rem";
+
+                        name.appendChild(idSpan);
+
+                        const policy = document.createElement("p");
+                        policy.textContent = candidate.Policy;
+
+                        policy.style.margin = "5px 0 0";
+                        policy.style.color = "#64748b";
+                        policy.style.fontSize = "0.9rem";
+
+                        info.appendChild(name);
+                        info.appendChild(policy);
+
+                        label.appendChild(radio);
+                        label.appendChild(icon);
+                        label.appendChild(info);
+
+                        fragment.appendChild(label);
+
+                    });
+
+                    list.appendChild(fragment);
+
+                }).catch(err => {
+                    console.error(err);
                 });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('candidateList').innerHTML = '<p style="color:red;">Error loading candidates.</p>';
-            });
-
+            }
+        }).catch(err => {
+            console.error("Error checking vote status:", err);
+        });
 
         // ==========================================
         // 2. จัดการตอนกดปุ่ม "Confirm Vote"
         // ==========================================
-        document.getElementById('confirmBtn').addEventListener('click', () => {
-
+        confirmBtn.addEventListener('click', () => {
             const selectedCandidate = document.querySelector('input[name="candidate"]:checked');
-
-
-            // ถ้ายังไม่เลือกใครเลย แจ้งเตือน
-            if (!selectedCandidate) {
-                alert('⚠️ Please select a candidate before confirming your vote!');
-                return;
-            }
-
-
             const selectedCanId = selectedCandidate.value;
-
 
             // ถามยืนยันอีกครั้ง
             const confirmVote = confirm(`Are you sure you want to vote for candidate ${selectedCanId}? This action cannot be undone.`);
@@ -182,10 +254,8 @@
             if (confirmVote) {
                 // ข้อมูลที่จะส่งไป Backend
                 const voteData = {
-                    citizen_id: "1234567890123", // รหัสผู้ใช้จำลอง (เดี๋ยวเราค่อยเชื่อมระบบ Login จริงๆ ทีหลัง)
                     can_id: selectedCanId
                 };
-
 
                 // ส่ง POST Request ไปหา API /vote
                 fetch('/Voter/vote', {
@@ -194,16 +264,15 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(voteData)
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            alert('✅ Your vote has been successfully submitted!');
+                }).then(response => {
+                    if (response.ok) {
+                        alert('✅ Your vote has been successfully submitted!');
 
-                            window.location.href = '/pages/voter/results';
-                        } else {
-                            alert('❌ Failed to submit vote.');
-                        }
-                    })
+                        window.location.href = '/pages/voter/results';
+                    } else {
+                        alert('❌ Failed to submit vote.');
+                    }
+                })
                     .catch(error => {
                         console.error('Error submitting vote:', error);
                         alert('❌ System error. Could not connect to server.');

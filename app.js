@@ -9,6 +9,7 @@ const MemoryStore = require('memorystore')(session);
 // Serve only public static assets needed by the frontend (CSS / JS)
 app.use('/CSS', express.static(path.join(__dirname, 'public', 'CSS')));
 app.use('/JS', express.static(path.join(__dirname, 'public', 'JS')));
+app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
 
 // Middleware to parse JSON and URL-encoded bodies
 app.use(express.json());
@@ -323,7 +324,18 @@ app.get('/voter/candidates', async (req, res) => {
         res.status(500).json({ error: "Failed to fetch candidates" });
     }
 });
-
+//1.5 เช็คว่าโหวตรึยัง
+app.get('/voter/has_voted', async (req, res) => {
+    try {
+        const citizen_id = req.session.citizen_id;
+        const sql = "SELECT has_voted FROM voters WHERE citizen_id = ?";
+        const [results] = await db.query(sql, [citizen_id]);
+        res.status(200).json({ has_voted: results[0].has_voted === 1 });
+    } catch (error) {
+        console.error('Has Voted Error:', error.message);
+        res.status(500).json({ error: 'Server error', message: error.message });
+    }
+});
 // 2. บันทึกโหวต 
 app.post('/voter/vote', async (req, res) => {
     try {
@@ -370,7 +382,6 @@ app.post('/voter/vote', async (req, res) => {
         const updateVoterSql = "UPDATE voters SET has_voted = 1 WHERE citizen_id = ?";
         await db.query(updateVoterSql, [citizen_id]);
 
-        console.log(`✅ Vote saved! Citizen ${citizen_id} voted for ${can_id}`);
         res.status(200).send('Vote submitted successfully');
     } catch (error) {
         console.error('Voter Vote Error:', error.message);
