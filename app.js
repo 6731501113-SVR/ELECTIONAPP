@@ -5,6 +5,8 @@ const db = require("./db.js")
 const argon2 = require('argon2');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
+const multer = require('multer');
+const upload = multer({ dest: './public/img' }).single("filetoupload");
 
 // Serve only public static assets needed by the frontend (CSS / JS)
 app.use('/CSS', express.static(path.join(__dirname, 'public', 'CSS')));
@@ -171,6 +173,18 @@ app.post('/logout', async (req, res) => {
         res.status(200).json({ status: 'success', msg: 'Logout สำเร็จ' });
     });
 });
+
+// ======================================== UPLOAD ========================================
+app.post("/uploading", function (req, res) {
+    upload(req, res, function (err) {
+        if (err) {
+            console.log(err);
+            return res.status(500).send("Upload failed");
+        }
+        res.status(200).send("Upload succesful");
+    })
+});
+
 
 // ======================================== ROUTE ========================================
 // หน้าเพจทั้งหมด
