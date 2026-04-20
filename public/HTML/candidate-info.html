@@ -115,6 +115,42 @@
       </h3>
 
       <div style="margin-top: 20px">
+        <div style="margin-bottom: 25px; text-align: center;">
+          <label style="
+                display: block;
+                margin-bottom: 10px;
+                font-weight: 600;
+                color: #94a3b8;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+              ">Profile Image</label>
+          <div style="display: inline-block;">
+            <img id="display-image" src="" alt="Profile Image" style="
+                  width: 150px;
+                  height: 150px;
+                  object-fit: cover;
+                  border-radius: 50%;
+                  border: 3px solid #e2e8f0;
+                  background-color: #f8fafc;
+                  display: none;
+                ">
+            <div id="no-image" style="
+                  width: 150px;
+                  height: 150px;
+                  border-radius: 50%;
+                  border: 3px solid #e2e8f0;
+                  background-color: #f8fafc;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: #94a3b8;
+                  font-size: 0.9rem;
+                ">
+              No Image
+            </div>
+          </div>
+        </div>
+
         <div style="margin-bottom: 25px">
           <label style="
                 display: block;
@@ -245,6 +281,16 @@
             .then((result) => {
               // นำข้อมูลมาแสดงผลในหน้า UI
               if (result && result.can_id) {
+                // แสดงรูปภาพ
+                if (result.img) {
+                  document.getElementById("display-image").src = result.img;
+                  document.getElementById("display-image").style.display = "block";
+                  document.getElementById("no-image").style.display = "none";
+                } else {
+                  document.getElementById("display-image").style.display = "none";
+                  document.getElementById("no-image").style.display = "flex";
+                }
+
                 document.getElementById("display-can-id").innerText =
                   result.can_id;
                 document.getElementById("display-name").innerText =

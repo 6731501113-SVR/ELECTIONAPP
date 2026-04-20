@@ -195,10 +195,14 @@
 
             data.ranking.forEach((can, index) => {
               const isFirst = index === 0 && can.votes_received > 0;
+              const imageElement = can.img 
+                ? `<img src="${can.img}" alt="${can.name}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">`
+                : `<div style="background: #e2e8f0; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👤</div>`;
+              
               rankingList.innerHTML += `
                 <div class="card rank-card ${isFirst ? "winner" : ""}">
                     ${isFirst ? '<div class="rank-badge">👑</div>' : ""}
-                    <div style="background: #e2e8f0; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👤</div>
+                    ${imageElement}
                     <div style="flex: 1;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <h3 style="margin: 0;">#${index + 1} ${can.name} (${can.can_id})</h3>

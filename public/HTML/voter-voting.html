@@ -182,18 +182,29 @@
                             confirmBtn.style.cursor = "pointer";
                         });
 
-                        const icon = document.createElement("div");
-                        icon.textContent = "👤";
-
-                        icon.style.width = "50px";
-                        icon.style.height = "50px";
-                        icon.style.background = theme.bg;
-                        icon.style.borderRadius = "50%";
-                        icon.style.display = "flex";
-                        icon.style.alignItems = "center";
-                        icon.style.justifyContent = "center";
-                        icon.style.color = theme.text;
-                        icon.style.fontSize = "1.5rem";
+                        let icon;
+                        if (candidate.img) {
+                            icon = document.createElement("img");
+                            icon.src = candidate.img;
+                            icon.alt = candidate.Name;
+                            icon.style.width = "50px";
+                            icon.style.height = "50px";
+                            icon.style.borderRadius = "50%";
+                            icon.style.objectFit = "cover";
+                            icon.style.border = `2px solid ${theme.bg}`;
+                        } else {
+                            icon = document.createElement("div");
+                            icon.textContent = "👤";
+                            icon.style.width = "50px";
+                            icon.style.height = "50px";
+                            icon.style.background = theme.bg;
+                            icon.style.borderRadius = "50%";
+                            icon.style.display = "flex";
+                            icon.style.alignItems = "center";
+                            icon.style.justifyContent = "center";
+                            icon.style.color = theme.text;
+                            icon.style.fontSize = "1.5rem";
+                        }
 
                         const info = document.createElement("div");
                         info.style.flexGrow = "1";

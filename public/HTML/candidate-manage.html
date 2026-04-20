@@ -34,6 +34,59 @@
                     <small style="color: #94a3b8; display: block; margin-top: 5px;">Candidate ID cannot be modified.</small>
                 </div>
 
+                <div class="form-group" style="margin-bottom: 25px; text-align: center;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #475569;">Profile Image</label>
+                    <div style="display: inline-block; margin-bottom: 15px;">
+                        <img id="current-image" src="" alt="Current Profile Image" style="
+                            width: 120px;
+                            height: 120px;
+                            object-fit: cover;
+                            border-radius: 50%;
+                            border: 3px solid #e2e8f0;
+                            background-color: #f8fafc;
+                            display: none;
+                        ">
+                        <div id="no-current-image" style="
+                            width: 120px;
+                            height: 120px;
+                            border-radius: 50%;
+                            border: 3px solid #e2e8f0;
+                            background-color: #f8fafc;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: #94a3b8;
+                            font-size: 0.8rem;
+                        ">
+                            No Image
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="previewImage()">
+                        <button type="button" onclick="document.getElementById('image-upload').click()" style="
+                            background-color: #e2e8f0;
+                            color: #475569;
+                            padding: 8px 16px;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-size: 0.9rem;
+                        ">Choose Image</button>
+                        <button type="button" id="upload-btn" onclick="uploadImage()" style="
+                            background-color: #16a34a;
+                            color: white;
+                            padding: 8px 16px;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-size: 0.9rem;
+                            margin-left: 10px;
+                            display: none;
+                        ">Upload</button>
+                        <span id="image-status" style="margin-left: 10px; font-size: 0.9rem; color: #64748b;"></span>
+                    </div>
+                </div>
+
                 <div class="form-group" style="margin-bottom: 25px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #475569;">Full Name</label>
                     <input id="input-name" type="text" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
@@ -99,6 +152,16 @@
                         document.getElementById('input-name').value          = data.name;
                         document.getElementById('input-personal-info').value = data.personal_info || '';
                         document.getElementById('input-policy').value        = data.policy || '';
+
+                        // แสดงรูปภาพปัจจุบัน
+                        if (data.img) {
+                            document.getElementById('current-image').src = data.img;
+                            document.getElementById('current-image').style.display = 'block';
+                            document.getElementById('no-current-image').style.display = 'none';
+                        } else {
+                            document.getElementById('current-image').style.display = 'none';
+                            document.getElementById('no-current-image').style.display = 'flex';
+                        }
                     })
                     .catch(err => {
                         console.error('Fetch Error:', err);
@@ -159,6 +222,99 @@
             el.style.display = 'block';
             el.style.background = success ? '#dcfce7' : '#fee2e2';
             el.style.color      = success ? '#166634' : '#991b1b';
+        }
+
+        function previewImage() {
+            const fileInput = document.getElementById('image-upload');
+            const file = fileInput.files[0];
+            const status = document.getElementById('image-status');
+
+            if (file) {
+                // ตรวจสอบประเภทไฟล์
+                if (!file.type.startsWith('image/')) {
+                    status.textContent = 'Please select an image file';
+                    status.style.color = '#dc2626';
+                    document.getElementById('upload-btn').style.display = 'none';
+                    return;
+                }
+
+                // ตรวจสอบขนาดไฟล์ (ไม่เกิน 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    status.textContent = 'File size must be less than 5MB';
+                    status.style.color = '#dc2626';
+                    document.getElementById('upload-btn').style.display = 'none';
+                    return;
+                }
+
+                // แสดงตัวอย่างรูปภาพ
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('current-image').src = e.target.result;
+                    document.getElementById('current-image').style.display = 'block';
+                    document.getElementById('no-current-image').style.display = 'none';
+                    status.textContent = 'Image selected. Click Upload to save.';
+                    status.style.color = '#16a34a';
+                    document.getElementById('upload-btn').style.display = 'inline-block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                status.textContent = '';
+                document.getElementById('upload-btn').style.display = 'none';
+            }
+        }
+
+        async function uploadImage() {
+            const fileInput = document.getElementById('image-upload');
+            const file = fileInput.files[0];
+            const status = document.getElementById('image-status');
+            const uploadBtn = document.getElementById('upload-btn');
+
+            if (!file) {
+                status.textContent = 'Please select an image first';
+                status.style.color = '#dc2626';
+                return;
+            }
+
+            // ปิดปุ่มอัปโหลดชั่วคราว
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            status.textContent = 'Uploading image...';
+            status.style.color = '#64748b';
+
+            try {
+                const formData = new FormData();
+                formData.append('filetoupload', file);
+
+                const response = await fetch('/candidate/upload-image', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    status.textContent = 'Image uploaded successfully!';
+                    status.style.color = '#16a34a';
+                    uploadBtn.style.display = 'none';
+                    fileInput.value = ''; // เคลียร์ file input
+
+                    // รีโหลดข้อมูลเพื่อแสดงรูปภาพใหม่
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    status.textContent = result.message || 'Upload failed';
+                    status.style.color = '#dc2626';
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                status.textContent = 'Upload failed. Please try again.';
+                status.style.color = '#dc2626';
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload';
+            }
         }
 
         function logout() {

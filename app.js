@@ -7,6 +7,8 @@ const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 const multer = require('multer');
 const upload = multer({ dest: './public/img' }).single("filetoupload");
+// ใช้ fs.existsSync() เช็คก่อนลบภาพเก่า
+const fs = require('fs');
 
 // Serve only public static assets needed by the frontend (CSS / JS)
 app.use('/CSS', express.static(path.join(__dirname, 'public', 'CSS')));
@@ -50,7 +52,7 @@ const setupVoter = require('./app-voter.js');
 // Initialize all route modules
 setupAuthentication(app, db, argon2);
 setupAdmin(app, db, argon2);
-setupCandidate(app, db, argon2);
+setupCandidate(app, db, argon2, upload, path, fs);
 setupVoter(app, db, argon2);
 
 // ======================================== DASHBOARD & RESULT ========================================
@@ -104,7 +106,7 @@ app.get('/results', async (req, res) => {
 
         // 2. ดึงรายชื่อ Candidate พร้อมจัดอันดับ
         const qRanking = `
-      SELECT can_id, name, vote_score AS votes_received, policy
+      SELECT can_id, name, vote_score AS votes_received, policy, img
       FROM candidates 
       WHERE name LIKE ? OR can_id LIKE ?
       ORDER BY vote_score DESC`;
@@ -173,18 +175,6 @@ app.post('/logout', async (req, res) => {
         res.status(200).json({ status: 'success', msg: 'Logout สำเร็จ' });
     });
 });
-
-// ======================================== UPLOAD ========================================
-app.post("/uploading", function (req, res) {
-    upload(req, res, function (err) {
-        if (err) {
-            console.log(err);
-            return res.status(500).send("Upload failed");
-        }
-        res.status(200).send("Upload succesful");
-    })
-});
-
 
 // ======================================== ROUTE ========================================
 // หน้าเพจทั้งหมด

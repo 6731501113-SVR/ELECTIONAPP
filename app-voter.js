@@ -7,7 +7,7 @@ module.exports = function(app, db, argon2) {
 app.get('/voter/candidates', async (req, res) => {
     try {
         const [candidates] = await db.query(
-            "SELECT can_id AS Candidate_ID, name AS Name, policy AS Policy FROM candidates"
+            "SELECT can_id AS Candidate_ID, name AS Name, policy AS Policy, img FROM candidates"
         );
         res.status(200).json(candidates);
     } catch (error) {
