@@ -7,99 +7,176 @@
     <link rel="stylesheet" href="/CSS/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; }
-        
-        /* ช่อง Search Design เดิม - คลิกแล้วกรอบม่วง */
-        .search-box { position: relative; max-width: 450px; margin-bottom: 25px; }
-        .search-box input { 
-            width: 100%; padding: 12px 12px 12px 45px; 
-            border: 1.5px solid #e2e8f0; border-radius: 12px; 
-            font-size: 0.95rem; transition: 0.3s; outline: none;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            margin: 0;
         }
-        .search-box input:focus { 
-            border-color: #9333ea; 
-            box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.1); 
-        }
-        .search-box span { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
 
-        /* ตาราง Responsive - ป้องกันข้อมูลถูกกิน */
-        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 850px; }
+        .search-box {
+            position: relative;
+            max-width: 450px;
+            margin-bottom: 25px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 12px 12px 45px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #9333ea;
+            box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.1);
+        }
+
+        .search-box span {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .table-container {
+            width: 100%;
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 850px;
+        }
+
+        /* ทำให้หัวตารางติดอยู่กับด้านบน */
+        table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #f8fafc;
+            /* กำหนดสีพื้นหลังเพื่อให้บังข้อมูลที่เลื่อนขึ้นมา */
+        }
 
         @media (max-width: 768px) {
-            .navbar h2 { font-size: 1.1rem !important; }
-            .container { margin-top: 220px !important; }
+            .navbar h2 {
+                font-size: 1.1rem !important;
+            }
+
+            .container {
+                margin-top: 220px !important;
+            }
         }
     </style>
 </head>
+
 <body style="display: block;">
 
-    <nav class="navbar admin" style="background-color: #9333ea; color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; height: 70px; z-index: 1000; box-sizing: border-box;">
+    <nav class="navbar admin"
+        style="background-color: #9333ea; color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; height: 70px; z-index: 1000; box-sizing: border-box;">
         <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; white-space: nowrap;">MFU Voting - Admin</h2>
-        <a href="/" onclick="logout()" class="btn" style="background: white; color: #9333ea; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; flex-shrink: 0;">Logout</a>
+        <a href="/" onclick="logout()" class="btn"
+            style="background: white; color: #9333ea; padding: 8px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; flex-shrink: 0;">Logout</a>
     </nav>
 
-    <div class="nav-links" style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 70px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
-        <a href="/pages/admin/dashboard" style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">📊 Dashboard</a>
-        <a href="/pages/admin/voters" style="text-decoration: none; color: #9333ea; font-weight: 600; border-bottom: 3px solid #9333ea; padding-bottom: 5px;">👥 Voters</a>
-        <a href="/pages/admin/candidates" style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">👤 Candidates</a>
-        <a href="/pages/admin/control" style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">⚙️ Control</a>
-        <a href="/pages/admin/results" style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">📈 Results</a>
+    <div class="nav-links"
+        style="background: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px 15px 13px; position: fixed; top: 70px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 999; flex-wrap: wrap; box-sizing: border-box;">
+        <a href="/pages/admin/dashboard"
+            style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">📊
+            Dashboard</a>
+        <a href="/pages/admin/voters"
+            style="text-decoration: none; color: #9333ea; font-weight: 600; border-bottom: 3px solid #9333ea; padding-bottom: 5px;">👥
+            Voters</a>
+        <a href="/pages/admin/candidates"
+            style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">👤
+            Candidates</a>
+        <a href="/pages/admin/control"
+            style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">⚙️
+            Control</a>
+        <a href="/pages/admin/results"
+            style="text-decoration: none; color: #64748b; font-weight: 600; border-bottom: 3px solid transparent; padding-bottom: 5px;">📈
+            Results</a>
     </div>
 
-    <div class="container" style="margin-top: 170px; max-width: 1200px; margin-left: auto; margin-right: auto; padding: 20px;">
+    <div class="container"
+        style="margin-top: 170px; max-width: 1200px; margin-left: auto; margin-right: auto; padding: 20px;">
         <h1 style="margin-bottom: 40px; color: #1e293b;">Manage Voters</h1>
 
-        <div class="card" style="background: white; padding: 35px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 40px;">
+        <div class="card"
+            style="background: white; padding: 35px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 40px;">
             <h3 style="margin-bottom: 25px; color: #1e293b;">Add New Voter</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end;">
-                <div><label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Citizen ID</label><input type="text" placeholder="13 digits" style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;"></div>
-                <div><label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Laser ID</label><input type="text" placeholder="JT0-XXXXXXX" style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;"></div>
-                <div><label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Full Name</label><input type="text" placeholder="Full Name" style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;"></div>
-                <button style="background: #7c3aed; color: white; padding: 12px 25px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer;">+ Add Voter</button>
-            </div>
+            <form id="addVoterForm"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end;">
+                <div>
+                    <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Citizen
+                        ID</label>
+                    <input type="text" id="citizen_id" placeholder="13 digits" required maxlength="13" pattern="\d{13}"
+                        style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Laser
+                        ID</label>
+                    <input type="text" id="laser_id" placeholder="JT0-XXXXXXX" required maxlength="12"
+                        style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Full
+                        Name</label>
+                    <input type="text" id="name" placeholder="Full Name" required
+                        style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;">
+                </div>
+                <button type="submit"
+                    style="background: #7c3aed; color: white; padding: 12px 25px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer;">+
+                    Add Voter</button>
+            </form>
         </div>
 
-        <div class="card" style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <div class="card"
+            style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="margin: 0; color: #1e293b;">Voter List</h3>
-                <span style="background: #f1f5f9; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; color: #64748b;">Active Session</span>
+                <span
+                    style="background: #f1f5f9; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; color: #64748b;">Active
+                    Session</span>
             </div>
 
-            <div class="search-box">
-                <span>🔍</span>
-                <input type="text" placeholder="Search by Name, ID...">
+            <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 25px; flex-wrap: wrap;">
+                <div class="search-box" style="margin-bottom: 0; flex: 1; min-width: 300px;">
+                    <span>🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search by Name or Citizen ID..."
+                        onkeyup="filterVoters()">
+                </div>
+
+                <div style="min-width: 150px;">
+                    <select id="statusFilter" onchange="filterVoters()"
+                        style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 12px; outline: none; font-family: 'Inter', sans-serif; color: #64748b; cursor: pointer;">
+                        <option value="all">📊 All Status</option>
+                        <option value="voted">✅ Voted</option>
+                        <option value="not_voted">❌ Not Voted</option>
+                    </select>
+                </div>
             </div>
-            
+
             <div class="table-container">
-                <table>
+                <table id="voterTable">
                     <thead>
                         <tr style="background: #f8fafc; color: #64748b; font-size: 0.9rem;">
                             <th style="padding: 15px; border-bottom: 2px solid #f1f5f9;">Full Name</th>
                             <th style="padding: 15px; border-bottom: 2px solid #f1f5f9;">Citizen ID</th>
-                            <th style="padding: 15px; border-bottom: 2px solid #f1f5f9;">Laser ID</th>
                             <th style="padding: 15px; border-bottom: 2px solid #f1f5f9;">Voting Status</th>
                             <th style="padding: 15px; border-bottom: 2px solid #f1f5f9;">Status</th>
                             <th style="padding: 15px; border-bottom: 2px solid #f1f5f9; text-align: center;">Action</th>
                         </tr>
                     </thead>
-                    <tbody style="color: #334155; font-size: 0.95rem;">
-                        <tr>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">Somchai Jaidee</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">1234567890123</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">AB12345678</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="color: #64748b;">Not Voted</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Active</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;"><button style="padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">Disable</button></td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">Suda Rakthai</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">9876543210987</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">JT12345678</td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="color: #16a34a; font-weight: 600;">Voted</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Active</span></td>
-                            <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;"><button style="padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">Disable</button></td>
-                        </tr>
+                    <tbody id="voterListBody" style="color: #334155; font-size: 0.95rem;">
                     </tbody>
                 </table>
             </div>
@@ -107,11 +184,140 @@
     </div>
 
     <script>
+        let allVoters = []; // ตัวแปรหลักสำหรับเก็บข้อมูลที่ Fetch มา
+
+        // ฟังก์ชันดึงข้อมูลจาก Database
+        async function fetchVoters() {
+            try {
+                const response = await fetch('/admin/voters');
+                const result = await response.json();
+                if (result.success) {
+                    allVoters = result.data; // เก็บข้อมูลลงในตัวแปร
+                    renderVoters(allVoters); // แสดงผลข้อมูลในตาราง
+                }
+            } catch (error) {
+                console.error("Error fetching voters:", error);
+            }
+        }
+
+        // ฟังก์ชันแสดงผลตาราง
+        function renderVoters(voters) {
+            const body = document.getElementById('voterListBody');
+            body.innerHTML = '';
+
+            voters.forEach(voter => {
+                const row = document.createElement('tr');
+
+                const votingText = voter.has_voted ? 'Voted' : 'Not Voted';
+                const votingStyle = voter.has_voted ? 'color: #16a34a; font-weight: 600;' : 'color: #64748b;';
+
+                const statusText = voter.is_active ? 'Active' : 'Inactive';
+                const statusBg = voter.is_active ? '#dcfce7' : '#fee2e2';
+                const statusColor = voter.is_active ? '#166534' : '#991b1b';
+                const actionText = voter.is_active ? 'Disable' : 'Enable';
+
+                row.innerHTML = `
+                    <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">${voter.name}</td>
+                    <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">${voter.citizen_id}</td>
+                    <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;"><span style="${votingStyle}">${votingText}</span></td>
+                    <td style="padding: 20px; border-bottom: 1px solid #f1f5f9;">
+                        <span style="background: ${statusBg}; color: ${statusColor}; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">${statusText}</span>
+                    </td>
+                    <td style="padding: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;">
+                        <button onclick="toggleVoterStatus('${voter.citizen_id}', ${voter.is_active})" 
+                                style="padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">
+                                ${actionText}
+                        </button>
+                    </td>
+                `;
+                body.appendChild(row);
+            });
+        }
+
+        // ฟังก์ชันค้นหา
+        function filterVoters() {
+            // ดึงค่าจากช่อง Search และ Dropdown
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const filtered = allVoters.filter(voter => {
+                // เงื่อนไขการค้นหา (ชื่อ หรือ ID)
+                const matchesSearch = voter.name.toLowerCase().includes(searchQuery) || voter.citizen_id.includes(searchQuery);
+
+                // เงื่อนไขการกรองสถานะ (Voted / Not Voted)
+                let matchesStatus = true;
+                if (statusFilter === 'voted') {
+                    matchesStatus = (voter.has_voted === 1);
+                } else if (statusFilter === 'not_voted') {
+                    matchesStatus = (voter.has_voted === 0);
+                }
+                return matchesSearch && matchesStatus;
+            });
+
+            renderVoters(filtered);
+        }
+
+        // ฟังก์ชัน Add Voter
+        document.getElementById('addVoterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const citizen_id = document.getElementById('citizen_id').value;
+            const laser_id = document.getElementById('laser_id').value;
+            const name = document.getElementById('name').value;
+
+            //confirm adding voter
+            const isConfirmed = confirm(`Confirming the addition of a voter to the list?\n\nname: ${name}\ncitizen id: ${citizen_id}`);
+            if (!isConfirmed) {
+                return; // cancel
+            }
+
+            try {
+                const response = await fetch('/admin/voters', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ citizen_id, laser_id, name })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    // กรณีสำเร็จ
+                    alert('✅ เพิ่มรายชื่อสำเร็จแล้ว');
+                    document.getElementById('addVoterForm').reset();
+                    fetchVoters(); // โหลดข้อมูลใหม่เพื่ออัปเดตตาราง
+                } else {
+                    // กรณีไม่สำเร็จ (เช่น Citizen ID ซ้ำ) 
+                    alert('⚠️ ' + result.message);
+                }
+            } catch (error) {
+                console.error("Error adding voter:", error);
+            }
+        });
+
+        // ฟังก์ชันเปิด/ปิด สถานะ Voter
+        async function toggleVoterStatus(citizen_id, currentStatus) {
+            const newStatus = currentStatus ? 0 : 1;
+            try {
+                const response = await fetch(`/admin/voters/${citizen_id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_active: newStatus })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    fetchVoters(); // โหลดข้อมูลใหม่
+                }
+            } catch (error) {
+                console.error("Error updating status:", error);
+            }
+        }
+
         function logout() {
             fetch('/logout', { method: 'POST' })
                 .then(() => window.location.href = '/')
                 .catch(err => console.error("Logout error:", err));
         }
+
+        // เรียกดึงข้อมูลครั้งแรกเมื่อโหลดหน้า
+        window.onload = fetchVoters;
     </script>
 </body>
 </html>
