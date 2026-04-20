@@ -147,25 +147,25 @@ module.exports = function (app, db, argon2) {
             const { is_open, admin_password } = req.body;
 
             // 1. ตรวจสอบรหัสผ่านของ Admin ก่อน (เช็คจากตาราง admin)
-            const checkPassSql = "SELECT * FROM admin WHERE username = 'admin' AND password = ?";
-            const [adminResult] = await db.query(checkPassSql, [admin_password]);
+            const checkPassSql = "SELECT * FROM admin WHERE username = 'admin'";
+            const [adminResult] = await db.query(checkPassSql);
+            if (await argon2.verify(adminResult[0].password, admin_password)) {
+                if (adminResult.length === 0) {
+                    // ถ้ารหัสผ่านไม่ตรงกับใน DB
+                    return res.status(401).json({
+                        success: false,
+                        message: 'Incorrect Admin password! System status could not be changed.'
+                    });
+                }
+                // 2. ถ้ารหัสผ่านถูกต้อง ค่อยทำการ UPDATE สถานะระบบ
+                const updateSql = "UPDATE admin SET is_open = ?";
+                await db.query(updateSql, [is_open]);
 
-            if (adminResult.length === 0) {
-                // ถ้ารหัสผ่านไม่ตรงกับใน DB
-                return res.status(401).json({
-                    success: false,
-                    message: 'Incorrect Admin password! System status could not be changed.'
+                res.status(200).json({
+                    success: true,
+                    message: `System status has been successfully changed to ${is_open === 1 ? 'Open' : 'Closed'}.`
                 });
             }
-
-            // 2. ถ้ารหัสผ่านถูกต้อง ค่อยทำการ UPDATE สถานะระบบ
-            const updateSql = "UPDATE admin SET is_open = ?";
-            await db.query(updateSql, [is_open]);
-
-            res.status(200).json({
-                success: true,
-                message: `System status has been successfully changed to ${is_open === 1 ? 'Open' : 'Closed'}.`
-            });
         } catch (error) {
             console.error('Update Control Status Error:', error.message);
             res.status(500).json({ error: 'Server error', message: error.message });

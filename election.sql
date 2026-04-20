@@ -7,7 +7,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 13, 2026 at 01:51 PM
+-- Generation Time: Apr 20, 2026 at 06:13 AM
 -- Server version: 11.4.5-MariaDB-log
 -- PHP Version: 8.4.6
 
@@ -42,7 +42,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`username`, `password`, `is_open`) VALUES
-('admin', '123456', 1);
+('admin', '$argon2id$v=19$m=65536,t=3,p=4$0VwuHq1MsBvbf3vGLuN2Qw$W1O2QEv7yhLevHixuqtJwrE82QwbK0jcQQRS896iPu0', 1);
 
 -- --------------------------------------------------------
 
@@ -54,6 +54,7 @@ CREATE TABLE `candidates` (
   `can_id` varchar(10) NOT NULL,
   `password` varchar(255) DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
+  `img` varchar(99) NOT NULL,
   `personal_info` text DEFAULT NULL,
   `policy` text DEFAULT NULL,
   `vote_score` int(11) DEFAULT 0,
@@ -64,12 +65,12 @@ CREATE TABLE `candidates` (
 -- Dumping data for table `candidates`
 --
 
-INSERT INTO `candidates` (`can_id`, `password`, `name`, `personal_info`, `policy`, `vote_score`, `is_active`) VALUES
-('C001', '$argon2id$v=19$m=65536,t=3,p=4$Rso4oFmofdhUsa0mIPxrrw$4E+FnN8VYEMz3JK8ryHrvcWpGywEpEfmtydLsZ8lJKQ', 'Dr. Anon Meekwamroo', 'Graduated Master\'s Degree of Black Magic from Azkaban ', 'Improve university facilities and infrastructure.', 1, 1),
-('C002', '$argon2id$v=19$m=65536,t=3,p=4$Rso4oFmofdhUsa0mIPxrrw$4E+FnN8VYEMz3JK8ryHrvcWpGywEpEfmtydLsZ8lJKQ', 'Asst. Prof. Suda Pattana', 'Info', 'Expand campus green spaces and sustainability.', 0, 1),
-('C003', '$argon2id$v=19$m=65536,t=3,p=4$Rso4oFmofdhUsa0mIPxrrw$4E+FnN8VYEMz3JK8ryHrvcWpGywEpEfmtydLsZ8lJKQ', 'Mr. Prasit Kaona', 'Info', 'Renovate digital library systems.', 0, 1),
-('C004', '$argon2id$v=19$m=65536,t=3,p=4$k/Crw53zAduS7e/NckSV9w$gRO5JTAUS7uQU9hLHNhQSmvSDyS4JS9eTf7bvYG68Go', 'Assoc. Prof. Somchai Rakdee', 'Info', 'Upgrade university internet speed and provide free software licenses for all students.', 0, 1),
-('C005', '$argon2id$v=19$m=65536,t=3,p=4$z5N7+awqVloawKQNRwV6JQ$+6OIZ0weqC3UkMCyjCZ57+HaoeRXmH1uCXUOOIAkM3I', 'Beta tester', 'Born 2 Chome-34-10 Ebisu, Shibuya, Tokyo 150-0013 Japan\nGraduated from harward in 3 year old', 'สร้าง Death game', 2, 1);
+INSERT INTO `candidates` (`can_id`, `password`, `name`, `img`, `personal_info`, `policy`, `vote_score`, `is_active`) VALUES
+('C001', '$argon2id$v=19$m=65536,t=3,p=4$Rso4oFmofdhUsa0mIPxrrw$4E+FnN8VYEMz3JK8ryHrvcWpGywEpEfmtydLsZ8lJKQ', 'Dr. Anon Meekwamroo', '/img/df15e4b1a897977a0851f29cb0e677b5', 'Graduated Master\'s Degree of Black Magic from Azkaban ', 'Improve university facilities and infrastructure.', 1, 1),
+('C002', '$argon2id$v=19$m=65536,t=3,p=4$Rso4oFmofdhUsa0mIPxrrw$4E+FnN8VYEMz3JK8ryHrvcWpGywEpEfmtydLsZ8lJKQ', 'Asst. Prof. Suda Pattana', '', 'Info', 'Expand campus green spaces and sustainability.', 0, 1),
+('C003', '$argon2id$v=19$m=65536,t=3,p=4$Rso4oFmofdhUsa0mIPxrrw$4E+FnN8VYEMz3JK8ryHrvcWpGywEpEfmtydLsZ8lJKQ', 'Mr. Prasit Kaona', '', 'Info', 'Renovate digital library systems.', 0, 1),
+('C004', '$argon2id$v=19$m=65536,t=3,p=4$k/Crw53zAduS7e/NckSV9w$gRO5JTAUS7uQU9hLHNhQSmvSDyS4JS9eTf7bvYG68Go', 'Assoc. Prof. Somchai Rakdee', '', 'Info', 'Upgrade university internet speed and provide free software licenses for all students.', 0, 1),
+('C005', '$argon2id$v=19$m=65536,t=3,p=4$z5N7+awqVloawKQNRwV6JQ$+6OIZ0weqC3UkMCyjCZ57+HaoeRXmH1uCXUOOIAkM3I', 'Beta tester', '', 'Born 2 Chome-34-10 Ebisu, Shibuya, Tokyo 150-0013 Japan\nGraduated from harward in 3 year old', 'สร้าง Death game', 2, 1);
 
 -- --------------------------------------------------------
 
@@ -93,7 +94,8 @@ INSERT INTO `voters` (`citizen_id`, `laser_id`, `name`, `has_voted`, `is_active`
 ('1234', '$argon2id$v=19$m=65536,t=3,p=4$w3NXwIsAc82w+nQTWHXCFQ$GqPJUHxMxf+JZz+4+iVkrKimgJJ/hTohQa/mRi1D2x8', 'tttt', 1, 1),
 ('1234567890123', '$argon2id$v=19$m=65536,t=3,p=4$x0QGvSMEixgDZERoqZtiNA$8d/qgKRNDMCH+m2pjpunqqAFOqloLxnYY6q6CA0b0vw', 'TESTER', 0, 1),
 ('2222', '$argon2id$v=19$m=65536,t=3,p=4$YMewE3ibQLm7JAA8GFkMGg$wmVylPVNAa8RERpdAyzMf8Sxme59aqwno1WcdDqCmZQ', 'REINE DE PRETICOR', 1, 1),
-('3333', '$argon2id$v=19$m=65536,t=3,p=4$mkGZbVL6gx0+b//O2ysHoA$qOLMF0EYHYRO79LzVeEVjMb9T9cYCUkjcMiajrGszas', 'ALAIN GUILLOTIN', 1, 1);
+('3333', '$argon2id$v=19$m=65536,t=3,p=4$mkGZbVL6gx0+b//O2ysHoA$qOLMF0EYHYRO79LzVeEVjMb9T9cYCUkjcMiajrGszas', 'ALAIN GUILLOTIN', 1, 1),
+('4444444444444', '$argon2id$v=19$m=65536,t=3,p=4$qwzaEscLTkZ15/2wAron+w$UE0/5j9jF5Ac78srzVBJ/4Gf/0jf4mFjwPNUfY7cotI', 'GOREG', 0, 1);
 
 -- --------------------------------------------------------
 

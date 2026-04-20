@@ -220,6 +220,9 @@ app.get('/pages/:section/:page', (req, res) => {
 
     // login page
     if (page === 'login' || page === 'register') {
+        if (req.session.isLoggedIn) {
+            return res.redirect(`/pages/${req.session.role}/dashboard`);
+        }
         return res.sendFile(
             path.join(__dirname, 'public', 'HTML', resolvePageFilename(section, page))
         );
