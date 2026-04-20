@@ -136,7 +136,7 @@
         }
 
         // 1. ดึงข้อมูลจาก API ตอนโหลดหน้าเว็บ
-        fetch('http://localhost:3000/Voter/candidates')
+        fetch('/voter/candidates')
             .then(response => response.json())
             .then(data => {
                 allCandidates = data; // เก็บข้อมูลต้นฉบับไว้

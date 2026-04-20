@@ -1,9 +1,16 @@
 module.exports = function (app, db, argon2) {
 
+    function isAdmin(req, res, next) {
+        if (req.session.user?.role !== "admin") {
+            return res.status(403).send("Forbidden");
+        }
+        next();
+    }
+
     // ======================================== ADMIN ========================================
 
     // GET /admin/voters - List all voters
-    app.get('/admin/voters', async (req, res) => {
+    app.get('/admin/voters', isAdmin, async (req, res) => {
         try {
             const sql = "SELECT citizen_id, laser_id, name, has_voted, is_active FROM voters";
             const [results] = await db.query(sql);
@@ -15,7 +22,7 @@ module.exports = function (app, db, argon2) {
     });
 
     // POST /admin/voters - Add new voter
-    app.post('/admin/voters', async (req, res) => {
+    app.post('/admin/voters', isAdmin, async (req, res) => {
         try {
             const { citizen_id, laser_id, name } = req.body;
             const hashed_laser_id = await argon2.hash(laser_id);
@@ -29,7 +36,7 @@ module.exports = function (app, db, argon2) {
     });
 
     // GET /admin/candidates - List all candidates
-    app.get('/admin/candidates', async (req, res) => {
+    app.get('/admin/candidates', isAdmin, async (req, res) => {
         try {
             const sql = "SELECT can_id, name, personal_info, policy, vote_score, is_active FROM candidates";
             const [results] = await db.query(sql);
@@ -41,7 +48,7 @@ module.exports = function (app, db, argon2) {
     });
 
     // POST /admin/candidates - Add new candidate
-    app.post('/admin/candidates', async (req, res) => {
+    app.post('/admin/candidates', isAdmin, async (req, res) => {
         try {
             const sqlLast = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
             const [result] = await db.query(sqlLast);
@@ -64,7 +71,7 @@ module.exports = function (app, db, argon2) {
     });
 
     // GET next candidate ID
-    app.get("/admin/candidates/next-id", async (req, res) => {
+    app.get("/admin/candidates/next-id", isAdmin, async (req, res) => {
         try {
             const sql = "SELECT can_id FROM candidates ORDER BY can_id DESC LIMIT 1";
             const [result] = await db.query(sql);
@@ -83,7 +90,7 @@ module.exports = function (app, db, argon2) {
     });
 
     // PUT /admin/candidates/:can_id - Enable/disable candidate
-    app.put('/admin/candidates/:can_id', async (req, res) => {
+    app.put('/admin/candidates/:can_id', isAdmin, async (req, res) => {
         try {
             const can_id = req.params.can_id;
             const { is_active } = req.body;
@@ -106,7 +113,7 @@ module.exports = function (app, db, argon2) {
     });
 
     // PUT /admin/voters/:citizen_id - Enable/disable voter
-    app.put('/admin/voters/:citizen_id', async (req, res) => {
+    app.put('/admin/voters/:citizen_id', isAdmin, async (req, res) => {
         try {
             const citizen_id = req.params.citizen_id;
             const { is_active } = req.body;
@@ -129,7 +136,7 @@ module.exports = function (app, db, argon2) {
     });
 
     // GET /admin/control - Get voting status
-    app.get('/admin/control', async (req, res) => {
+    app.get('/admin/control', isAdmin, async (req, res) => {
         try {
             const sql = "SELECT is_open FROM admin LIMIT 1";
             const [results] = await db.query(sql);
@@ -142,7 +149,7 @@ module.exports = function (app, db, argon2) {
     });
 
     //  /admin/control  - put
-    app.put('/admin/control', async (req, res) => {
+    app.put('/admin/control', isAdmin, async (req, res) => {
         try {
             const { is_open, admin_password } = req.body;
 
@@ -150,13 +157,7 @@ module.exports = function (app, db, argon2) {
             const checkPassSql = "SELECT * FROM admin WHERE username = 'admin'";
             const [adminResult] = await db.query(checkPassSql);
             if (await argon2.verify(adminResult[0].password, admin_password)) {
-                if (adminResult.length === 0) {
-                    // ถ้ารหัสผ่านไม่ตรงกับใน DB
-                    return res.status(401).json({
-                        success: false,
-                        message: 'Incorrect Admin password! System status could not be changed.'
-                    });
-                }
+
                 // 2. ถ้ารหัสผ่านถูกต้อง ค่อยทำการ UPDATE สถานะระบบ
                 const updateSql = "UPDATE admin SET is_open = ?";
                 await db.query(updateSql, [is_open]);
@@ -164,6 +165,12 @@ module.exports = function (app, db, argon2) {
                 res.status(200).json({
                     success: true,
                     message: `System status has been successfully changed to ${is_open === 1 ? 'Open' : 'Closed'}.`
+                });
+            } else {
+                // ถ้ารหัสผ่านไม่ตรงกับใน DB
+                return res.status(401).json({
+                    success: false,
+                    message: 'Incorrect Admin password! System status could not be changed.'
                 });
             }
         } catch (error) {

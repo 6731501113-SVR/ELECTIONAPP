@@ -21,6 +21,8 @@ app.use(express.urlencoded({ extended: true }));
 // Session Configuration 
 app.use(session({
     secret: 'my-secret-key',
+    secure: true,
+    sameSite: 'strict',
     resave: false,
     saveUninitialized: false, // เปลี่ยนเป็น false เพื่อไม่ให้จองที่ว่างถ้าไม่จำเป็น
     cookie: {
