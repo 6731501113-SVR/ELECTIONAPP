@@ -90,7 +90,7 @@
 
         <div class="search-box">
             <span>🔍</span>
-            <input type="text" placeholder="Search by Name, ID...">
+            <input type="text" id="search" placeholder="Search by Name, ID...">
         </div>
 
 
@@ -120,13 +120,34 @@
         confirmBtn.disabled = true;
         confirmBtn.style.backgroundColor = "#94a3b8";
         confirmBtn.style.cursor = "not-allowed";
-        // check has_voted
-        fetch('/voter/has_voted').then(res => res.json()).then(data => {
-            if (data.has_voted) {
+        // check has_voted และ is_open
+        Promise.all([
+            fetch('/voter/has_voted').then(res => res.json()),
+            fetch('/admin/control').then(res => res.json())
+        ]).then(([hasVotedData, controlData]) => {
+            const list = document.getElementById("candidateList");
+            
+            // ==========================================
+            // -1. ตรวจสอบระบบเปิด/ปิด
+            // ==========================================
+            if (!controlData.is_open || controlData.is_open === 0) {
+                list.innerHTML = "";
+                const message = document.createElement("p");
+                message.textContent = "🔒 Voting system is currently closed. Please try again later.";
+                message.style.textAlign = "center";
+                message.style.color = "#ef4444";
+                message.style.fontSize = "1.1rem";
+                list.appendChild(message);
+                confirmBtn.disabled = true;
+                confirmBtn.style.backgroundColor = "#94a3b8";
+                confirmBtn.style.cursor = "not-allowed";
+                return;
+            }
+            
+            if (hasVotedData.has_voted) {
                 // ==========================================
                 // 0. ถ้าโหวตแล้ว แสดงข้อความและปิดการโหวต
                 // ==========================================
-                const list = document.getElementById("candidateList");
                 list.innerHTML = "";
                 const message = document.createElement("p");
                 message.textContent = "I WILL NEVER GONNA GIVE YOU A CHANCE TO VOTE AGAIN! (You have already voted)";
@@ -143,7 +164,7 @@
                 // ==========================================
                 // 1. ดึงข้อมูลผู้สมัครมาแสดงเป็นตัวเลือก 
                 // ==========================================
-                fetch('/Voter/candidates').then(res => res.json()).then(data => {
+                fetch('/voter/candidates').then(res => res.json()).then(data => {
                     console.log("Fetched Candidates:", data);
                     const list = document.getElementById("candidateList");
                     list.innerHTML = "";
@@ -249,7 +270,7 @@
                 });
             }
         }).catch(err => {
-            console.error("Error checking vote status:", err);
+            console.error("Error checking vote or system status:", err);
         });
 
         // ==========================================
@@ -289,6 +310,19 @@
                         alert('❌ System error. Could not connect to server.');
                     });
             }
+        });
+
+        document.querySelector('#search').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('#candidateList label').forEach(label => {
+                const name = label.querySelector('h3').textContent.toLowerCase();
+                const id = label.querySelector('h3 span').textContent.toLowerCase();
+                if (name.includes(query) || id.includes(query)) {
+                    label.style.display = 'flex';
+                } else {
+                    label.style.display = 'none';
+                }
+            });
         });
 
         function logout() {
